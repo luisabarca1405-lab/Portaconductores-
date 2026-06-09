@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portaconductores — Buscador Dartel</title>
+<style>
+  :root {
+    --bg: #F0F2F5; --surface: #FFFFFF; --surface2: #F7F8FA;
+    --border: #DDE1E8; --accent: #C8102E; --accent2: #1A2B4A;
+    --text: #1A1D23; --muted: #6B7280;
+    --badge-expomin: #C8102E; --badge-mjm: #1A5C96;
+    --green: #16A34A;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.05);
+    --radius: 8px; --font-mono: 'Courier New', monospace;
+  }
+  body.dark-mode {
+    --bg: #0F1117; --surface: #1A1D27; --surface2: #1E2130;
+    --border: #2D3148; --text: #F1F3F8; --muted: #C4CAD6;
+  }
+  body.dark-mode .controls { background: #1A1D27 !important; border-color: #2D3148 !important; }
+  body.dark-mode #searchInput { background: #0F1117 !important; color: #F1F3F8 !important; border-color: #3D4468 !important; }
+  body.dark-mode #searchInput:focus { background: #1A1D27 !important; border-color: #6B7FBA !important; }
+  body.dark-mode select { background-color: #0F1117 !important; color: #F1F3F8 !important; border-color: #3D4468 !important; }
+  body.dark-mode table { background: #1A1D27 !important; }
+  body.dark-mode thead { background: #0D1526 !important; }
+  body.dark-mode tbody tr { border-color: #2D3148 !important; }
+  body.dark-mode tbody tr:hover { background: #1E2535 !important; }
+  body.dark-mode tbody tr.selected { background: #1A2D4A !important; }
+  /* Códigos MUCHO más visibles en dark */
+  body.dark-mode td.code { color: #7EB8F7 !important; }
+  body.dark-mode .desc-text { color: #E8ECF4 !important; }
+  body.dark-mode .desc-dim { color: #9AA5BC !important; }
+  body.dark-mode #footer-credit { color: #4B5563 !important; }
+  body.dark-mode .count-badge { background: #2D4A8A !important; }
+  body.dark-mode .btn-sel-all { background: #1E2535 !important; border-color: #3D4468 !important; color: #C4CAD6 !important; }
+  body.dark-mode .btn-copy-row { background: transparent !important; border-color: #3D4468 !important; color: #9AA5BC !important; }
+  body.dark-mode .btn-copy-row:hover { background: #1A2D4A !important; border-color: #7EB8F7 !important; color: #7EB8F7 !important; }
+  body.dark-mode #sug-box { background: #1A1D27; border-color: #3D4468; }
+  body.dark-mode #sug-box h3 { color: #F1F3F8; }
+  body.dark-mode #sug-box p { color: #B0B7C3; }
+  body.dark-mode .sug-cancel { color: #B0B7C3; border-color: #3D4468; background: transparent; }
+  body.dark-mode #sug-box textarea, body.dark-mode #sug-box input[type=text] { background: #0F1117 !important; color: #F1F3F8 !important; border-color: #3D4468 !important; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.5; transition: background .3s, color .3s; }
+
+  header { background: var(--accent2); padding: 12px 20px; display: flex; align-items: center; gap: 14px; border-bottom: 3px solid var(--accent); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,.25); flex-wrap: wrap; }
+  .logo-box { height: 52px; width: 52px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; padding: 6px; flex-shrink: 0; cursor: pointer; transition: transform .15s, box-shadow .15s; }
+  .logo-box:hover { transform: scale(1.06); box-shadow: 0 0 0 3px rgba(200,16,46,.4); }
+  .header-info h1 { color: #fff; font-size: 17px; font-weight: 700; letter-spacing: -.2px; }
+  .header-info p { color: rgba(255,255,255,.75); font-size: 12px; margin-top: 1px; }
+  .header-count { background: rgba(255,255,255,.18); color: #fff; font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 20px; white-space: nowrap; }
+
+  .controls {
+    background: var(--surface); padding: 14px 24px; border-bottom: 1px solid var(--border);
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+  .search-wrap { position: relative; flex: 1; min-width: 260px; }
+  .search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+  #searchInput {
+    width: 100%; padding: 9px 12px 9px 34px; border: 1.5px solid var(--border);
+    border-radius: var(--radius); font-size: 14px; color: var(--text);
+    background: var(--surface2); outline: none; transition: border-color .15s;
+  }
+  #searchInput:focus { border-color: var(--accent2); background: #fff; }
+  select {
+    padding: 9px 28px 9px 10px; border: 1.5px solid var(--border);
+    border-radius: var(--radius); font-size: 13px; color: var(--text);
+    background: var(--surface2); appearance: none; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236B7280' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 9px center; outline: none;
+  }
+  select:focus { border-color: var(--accent2); }
+  .count-badge { background: var(--accent2); color: #fff; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
+  .btn-sel-all { padding: 8px 14px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: var(--radius); font-size: 12px; cursor: pointer; color: var(--muted); transition: all .15s; white-space: nowrap; }
+  .btn-sel-all:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  .table-wrap { padding: 20px 24px 110px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+  thead { background: var(--accent2); }
+  thead th { color: rgba(255,255,255,.9); font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; padding: 11px 12px; text-align: left; white-space: nowrap; }
+  thead th:first-child { width: 36px; }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+  tbody tr.selected { background: #EEF4FF; }
+  td { padding: 9px 12px; vertical-align: middle; }
+
+  td.code { font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; color: var(--accent2); white-space: nowrap; }
+
+  /* Descripción + acabado en la misma celda, cerca */
+  td.desc-cell { font-size: 13px; }
+  .desc-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .desc-text { }
+  .desc-dim  { color: var(--muted); font-size: 12.5px; }
+  .tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+  .tag-eg { background: #FEF3C7; color: #92400E; }
+  .tag-hg { background: #DCFCE7; color: #166534; }
+
+  .badge-src { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: #fff; white-space: nowrap; }
+  .badge-expomin { background: var(--badge-expomin); }
+  .badge-mjm     { background: var(--badge-mjm); }
+
+  /* Botón copia individual */
+  .btn-copy-row {
+    background: none; border: 1px solid var(--border); border-radius: 5px;
+    padding: 3px 8px; font-size: 11px; cursor: pointer; color: var(--muted);
+    transition: all .15s; white-space: nowrap;
+  }
+  .btn-copy-row:hover { border-color: var(--accent2); color: var(--accent2); background: #EEF4FF; }
+  .btn-copy-row.copied { border-color: var(--green); color: var(--green); }
+
+  input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; accent-color: var(--accent2); }
+
+  .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty svg { margin-bottom: 12px; opacity: .3; }
+  .empty p { font-size: 15px; }
+  .empty small { font-size: 12px; }
+
+  #copyBar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--accent2); color: #fff; padding: 14px 24px;
+    display: none; align-items: center; gap: 14px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,.2); z-index: 100;
+  }
+  #copyBar.visible { display: flex; }
+  .copy-info { flex: 1; font-size: 13px; }
+  .copy-info strong { font-size: 15px; }
+  #codesPreview { font-family: var(--font-mono); font-size: 11px; background: rgba(255,255,255,.1); border-radius: 4px; padding: 6px 10px; max-width: 420px; overflow-x: auto; white-space: nowrap; flex: 2; }
+  .btn-copy-bar { background: var(--accent); color: #fff; border: none; padding: 9px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity .15s; white-space: nowrap; }
+  .btn-copy-bar:hover { opacity: .85; }
+  .btn-clear { background: rgba(255,255,255,.15); color: #fff; border: none; padding: 9px 14px; border-radius: var(--radius); font-size: 12px; cursor: pointer; white-space: nowrap; }
+  .btn-clear:hover { background: rgba(255,255,255,.25); }
+  .copy-toast { position: fixed; bottom: 82px; left: 50%; transform: translateX(-50%); background: var(--green); color: #fff; padding: 9px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 200; }
+  .copy-toast.show { opacity: 1; }
+
+  @media (max-width: 768px) {
+    .controls { flex-direction: column; align-items: stretch; }
+    .table-wrap { padding: 10px 6px 130px; }
+  }
+
+  /* ── SUGERENCIAS ── */
+  #sug-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:8000; }
+  #sug-overlay.active { display:flex; align-items:center; justify-content:center; }
+  #sug-box { background:var(--surface); border:2px solid var(--accent2); border-radius:16px; padding:28px 28px 24px; width:100%; max-width:420px; box-shadow:0 8px 32px rgba(0,0,0,.3); }
+  #sug-box h3 { font-size:17px; font-weight:700; color:var(--text); margin-bottom:4px; }
+  #sug-box p { font-size:13px; color:var(--muted); margin-bottom:16px; }
+  #sug-box textarea { width:100%; height:110px; border:1.5px solid var(--border); border-radius:10px; padding:10px 12px; font-size:14px; color:var(--text); background:var(--bg); resize:none; outline:none; font-family:inherit; transition:border-color .2s; margin-bottom:12px; }
+  #sug-box textarea:focus { border-color:var(--accent2); }
+  #sug-box input[type=text] { width:100%; border:1.5px solid var(--border); border-radius:10px; padding:9px 12px; font-size:14px; color:var(--text); background:var(--bg); outline:none; font-family:inherit; margin-bottom:12px; transition:border-color .2s; }
+  #sug-box input[type=text]:focus { border-color:var(--accent2); }
+  .sug-actions { display:flex; gap:10px; justify-content:flex-end; }
+  .sug-cancel { padding:8px 18px; background:none; border:1.5px solid var(--border); border-radius:8px; font-size:13px; cursor:pointer; color:var(--muted); }
+  .sug-send { padding:8px 18px; background:var(--accent2); border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; color:#fff; }
+  .sug-send:hover { opacity:.88; }
+  #sug-success { display:none; text-align:center; padding:20px 0; }
+  #sug-success .sug-ok-icon { font-size:40px; margin-bottom:10px; }
+  #sug-success p { color:var(--text); font-size:15px; font-weight:600; }
+  /* header buttons */
+  .hdr-btn { background:rgba(255,255,255,.15); border:none; border-radius:20px; padding:6px 14px; cursor:pointer; font-size:13px; font-weight:600; color:#fff; display:flex; align-items:center; gap:6px; transition:background .2s; white-space:nowrap; }
+  .hdr-btn:hover { background:rgba(255,255,255,.28); }
+</style>
+</head>
+<body>
+
+<header>
+  <!-- Logo / botón limpiar -->
+  <div class="logo-box" onclick="resetAll()" title="Limpiar y volver al inicio">
+    <svg width="44" height="36" viewBox="0 0 44 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Símbolo Dartel: círculo con líneas eléctricas -->
+      <circle cx="22" cy="18" r="16" fill="#1A2B4A" stroke="#C8102E" stroke-width="2.5"/>
+      <line x1="22" y1="6" x2="22" y2="30" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+      <line x1="10" y1="18" x2="34" y2="18" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+      <line x1="13" y1="10" x2="31" y2="26" stroke="#C8102E" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="31" y1="10" x2="13" y2="26" stroke="#C8102E" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <!-- Info -->
+  <div class="header-info">
+    <h1>Portaconductores</h1>
+    <p>Buscador de productos · Dartel S.A.</p>
+    <p style="font-size:11px;color:rgba(255,255,255,0.85);font-weight:600;letter-spacing:0.5px;">Creado por Luis Abarca Meza</p>
+  </div>
+
+  <!-- Badges + botones todos a la derecha -->
+  <div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex-shrink:0;">
+    <span class="badge-src badge-expomin" style="font-size:11px;padding:4px 10px;">Comercial Expomin</span>
+    <span class="badge-src badge-mjm" style="font-size:11px;padding:4px 10px;">MJM S.A.</span>
+    <button class="hdr-btn" id="dark-toggle" onclick="toggleDark()">🌙 Oscuro</button>
+    <button class="hdr-btn" onclick="openSug()">📬 Sugerencias</button>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="searchInput" placeholder="Ej: esc epc 200  /  bandeja bpc 300  /  curva t 400  /  abrazadera 3/4" autocomplete="off">
+  </div>
+  <select id="filterProveedor">
+    <option value="">Todos los proveedores</option>
+    <option value="expomin">Comercial Expomin</option>
+    <option value="mjm">MJM S.A.</option>
+  </select>
+  <select id="filterLinea">
+    <option value="">Todas las líneas</option>
+    <option value="EPC">Escalerilla EPC</option>
+    <option value="BPC">Bandeja Lisa BPC</option>
+    <option value="BRPC">Bandeja Ranurada BRPC</option>
+    <option value="Riel">Rieles</option>
+    <option value="Abrazadera">Abrazaderas</option>
+    <option value="Caja">Cajas</option>
+    <option value="Accesorio">Accesorios</option>
+  </select>
+  <select id="filterAcabado">
+    <option value="">EG y HG</option>
+    <option value="EG">Solo EG</option>
+    <option value="HG">Solo HG</option>
+  </select>
+  <button class="btn-sel-all" onclick="selectAll()">Seleccionar visibles</button>
+  <span class="count-badge" id="countBadge">0 productos</span>
+</div>
+
+<div class="table-wrap">
+  <table id="productTable">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Código Dartel</th>
+        <th>Descripción · Medidas · Acabado</th>
+        <th>Proveedor</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+  <div class="empty" id="emptyState" style="display:none;">
+    <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <p>Sin resultados</p>
+    <small>Prueba con: esc epc 200 · bandeja bpc 300 · curva t 400 · abrazadera 2</small>
+  </div>
+</div>
+
+<div id="footer-credit" style="text-align:center;padding:20px 0 14px;font-size:11px;font-weight:500;letter-spacing:1.5px;color:#aaa;transition:color .3s;">✦ Creado por Luis Abarca Meza ✦</div>
+<!-- Footer flotante -->
+<div id="footer-float" style="position:fixed;bottom:0;left:0;right:0;background:rgba(26,43,74,0.97);backdrop-filter:blur(8px);padding:7px 24px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.55);letter-spacing:.06em;z-index:5;pointer-events:none;">
+  <span>Portaconductores · Dartel S.A.</span>
+  <span>✦ Creado por Luis Abarca Meza ✦</span>
+  <span id="footer-float-count" style="color:rgba(255,255,255,.35);"></span>
+</div>
+
+<!-- SUGERENCIAS -->
+<div id="sug-overlay">
+  <div id="sug-box">
+    <div id="sug-form-area">
+      <h3>📬 Buzón de sugerencias</h3>
+      <p>¿Tienes una idea o comentario para mejorar el buscador? Escríbenos.</p>
+      <input type="text" id="sug-nombre" placeholder="Tu nombre (opcional)"/>
+      <textarea id="sug-msg" placeholder="Escribe tu sugerencia aquí..."></textarea>
+      <div class="sug-actions">
+        <button class="sug-cancel" onclick="closeSug()">Cancelar</button>
+        <button class="sug-send" id="sug-btn" onclick="sendSug()">✉️ Enviar</button>
+      </div>
+    </div>
+    <div id="sug-success">
+      <div class="sug-ok-icon">✅</div>
+      <p>¡Sugerencia enviada! Gracias.</p>
+      <button class="sug-cancel" style="margin-top:12px;" onclick="closeSug()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="copyBar">
+  <div class="copy-info"><strong id="copyCount">0</strong> código(s)</div>
+  <div id="codesPreview"></div>
+  <button class="btn-copy-bar" onclick="copyCodes()">📋 Copiar para SAP</button>
+  <button class="btn-clear" onclick="clearSelection()">✕ Limpiar</button>
+</div>
+<div class="copy-toast" id="copyToast">✓ Copiado</div>
+
+<script>
+// ─── BASE DE DATOS ───────────────────────────────────────────────────────────
+// Campos: c=código, d=descripción, m=medidas completas, w=ancho(mm o pulg), g=grosor, l=línea, a=acabado, p=proveedor
+// w = primer número del ancho para búsqueda rápida por dimensión
+const P = [
+
+// ══════════════════════════════════════════════════════════════
+// EXPOMIN — ESCALERILLA EPC
+// ══════════════════════════════════════════════════════════════
+// Escalerilla recta EG
+{c:"301001014",d:"Escalerilla EPC",          m:"100×100×3000 2.0/1.5mm",w:"100",g:"e2.0/1.5mm",l:"EPC",a:"EG",p:"expomin"},
+{c:"302001014",d:"Escalerilla EPC",          m:"200×100×3000 2.0/1.5mm",w:"200",g:"e2.0/1.5mm",l:"EPC",a:"EG",p:"expomin"},
+{c:"303001014",d:"Escalerilla EPC",          m:"300×100×3000 2.0/1.5mm",w:"300",g:"e2.0/1.5mm",l:"EPC",a:"EG",p:"expomin"},
+{c:"304001014",d:"Escalerilla EPC",          m:"400×100×3000 2.0/1.5mm",w:"400",g:"e2.0/1.5mm",l:"EPC",a:"EG",p:"expomin"},
+{c:"306001014",d:"Escalerilla EPC",          m:"600×100×3000 2.0/1.5mm",w:"600",g:"e2.0/1.5mm",l:"EPC",a:"EG",p:"expomin"},
+// Tapa escalerilla EG
+{c:"404001214",d:"Tapa Escalerilla EPC",     m:"100×100×3000",w:"100",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"412001014",d:"Tapa Escalerilla EPC",     m:"200×100×3000",w:"200",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"313001914",d:"Tapa Escalerilla EPC",     m:"300×100×3000",w:"300",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"414011214",d:"Tapa Escalerilla EPC",     m:"400×100×3000",w:"400",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"416001114",d:"Tapa Escalerilla EPC",     m:"600×100×3000",w:"600",g:"",l:"EPC",a:"EG",p:"expomin"},
+// Escalerilla recta HG
+{c:"311001014",d:"Escalerilla EPC",          m:"100×100×3000 2.0/1.5mm",w:"100",g:"e2.0/1.5mm",l:"EPC",a:"HG",p:"expomin"},
+{c:"312001014",d:"Escalerilla EPC",          m:"200×100×3000 2.0/1.5mm",w:"200",g:"e2.0/1.5mm",l:"EPC",a:"HG",p:"expomin"},
+{c:"313001014",d:"Escalerilla EPC",          m:"300×100×3000 2.0/1.5mm",w:"300",g:"e2.0/1.5mm",l:"EPC",a:"HG",p:"expomin"},
+{c:"314001014",d:"Escalerilla EPC",          m:"400×100×3000 2.0/1.5mm",w:"400",g:"e2.0/1.5mm",l:"EPC",a:"HG",p:"expomin"},
+{c:"316001014",d:"Escalerilla EPC",          m:"600×100×3000 2.0/1.5mm",w:"600",g:"e2.0/1.5mm",l:"EPC",a:"HG",p:"expomin"},
+// Tapa escalerilla HG
+{c:"411003014",d:"Tapa Escalerilla EPC",     m:"100×100×3000",w:"100",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"412002614",d:"Tapa Escalerilla EPC",     m:"200×100×3000",w:"200",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"413001214",d:"Tapa Escalerilla EPC",     m:"300×100×3000",w:"300",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"414041214",d:"Tapa Escalerilla EPC",     m:"400×100×3000",w:"400",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"416001214",d:"Tapa Escalerilla EPC",     m:"600×100×3000",w:"600",g:"",l:"EPC",a:"HG",p:"expomin"},
+// CVI EG
+{c:"301002014",d:"Curva Vertical Interior 90° EPC", m:"100×100 R300",w:"100",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"302001714",d:"Curva Vertical Interior 90° EPC", m:"200×100 R300",w:"200",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"313004414",d:"Curva Vertical Interior 90° EPC", m:"300×100 R300",w:"300",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"314011214",d:"Curva Vertical Interior 90° EPC", m:"400×100 R300",w:"400",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"316002414",d:"Curva Vertical Interior 90° EPC", m:"600×100 R300",w:"600",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"301002814",d:"Tapa Curva Vertical Interior 90° EPC",m:"100×100 R300",w:"100",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"302002814",d:"Tapa Curva Vertical Interior 90° EPC",m:"200×100 R300",w:"200",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"303001914",d:"Tapa Curva Vertical Interior 90° EPC",m:"300×100 R300",w:"300",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"314011514",d:"Tapa Curva Vertical Interior 90° EPC",m:"400×100 R300",w:"400",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"416002414",d:"Tapa Curva Vertical Interior 90° EPC",m:"600×100 R300",w:"600",g:"",l:"EPC",a:"EG",p:"expomin"},
+// CVI HG
+{c:"311001114",d:"Curva Vertical Interior 90° EPC", m:"100×100 R300",w:"100",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"312001114",d:"Curva Vertical Interior 90° EPC", m:"200×100 R300",w:"200",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"313001114",d:"Curva Vertical Interior 90° EPC", m:"300×100 R300",w:"300",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"314001114",d:"Curva Vertical Interior 90° EPC", m:"400×100 R300",w:"400",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"316001114",d:"Curva Vertical Interior 90° EPC", m:"600×100 R300",w:"600",g:"",l:"EPC",a:"HG",p:"expomin"},
+// CVE EG
+{c:"301003414",d:"Curva Vertical Exterior 90° EPC", m:"100×100 R300",w:"100",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"302002014",d:"Curva Vertical Exterior 90° EPC", m:"200×100 R300",w:"200",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"313004314",d:"Curva Vertical Exterior 90° EPC", m:"300×100 R300",w:"300",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"304001814",d:"Curva Vertical Exterior 90° EPC", m:"400×100 R300",w:"400",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"316002514",d:"Curva Vertical Exterior 90° EPC", m:"600×100 R300",w:"600",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"301003014",d:"Tapa Curva Vertical Exterior 90° EPC",m:"100×100 R300",w:"100",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"302003014",d:"Tapa Curva Vertical Exterior 90° EPC",m:"200×100 R300",w:"200",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"303002014",d:"Tapa Curva Vertical Exterior 90° EPC",m:"300×100 R300",w:"300",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"304002214",d:"Tapa Curva Vertical Exterior 90° EPC",m:"400×100 R300",w:"400",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"416002714",d:"Tapa Curva Vertical Exterior 90° EPC",m:"600×100 R300",w:"600",g:"",l:"EPC",a:"EG",p:"expomin"},
+// CVE HG
+{c:"311001214",d:"Curva Vertical Exterior 90° EPC", m:"100×100 R300",w:"100",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"312001214",d:"Curva Vertical Exterior 90° EPC", m:"200×100 R300",w:"200",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"313001214",d:"Curva Vertical Exterior 90° EPC", m:"300×100 R300",w:"300",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"314001214",d:"Curva Vertical Exterior 90° EPC", m:"400×100 R300",w:"400",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"316001214",d:"Curva Vertical Exterior 90° EPC", m:"600×100 R300",w:"600",g:"",l:"EPC",a:"HG",p:"expomin"},
+// CH EG
+{c:"301001814",d:"Curva Horizontal 90° EPC", m:"100×100 R300",w:"100",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"312002614",d:"Curva Horizontal 90° EPC", m:"200×100 R300",w:"200",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"313004214",d:"Curva Horizontal 90° EPC", m:"300×100 R300",w:"300",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"314011114",d:"Curva Horizontal 90° EPC", m:"400×100 R300",w:"400",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"306001314",d:"Curva Horizontal 90° EPC", m:"600×100 R300",w:"600",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"301002614",d:"Tapa Curva Horizontal 90° EPC",m:"100×100 R300",w:"100",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"302002614",d:"Tapa Curva Horizontal 90° EPC",m:"200×100 R300",w:"200",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"303001614",d:"Tapa Curva Horizontal 90° EPC",m:"300×100 R300",w:"300",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"314011414",d:"Tapa Curva Horizontal 90° EPC",m:"400×100 R300",w:"400",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"416002314",d:"Tapa Curva Horizontal 90° EPC",m:"600×100 R300",w:"600",g:"",l:"EPC",a:"EG",p:"expomin"},
+// CH HG
+{c:"311001314",d:"Curva Horizontal 90° EPC", m:"100×100 R300",w:"100",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"312001314",d:"Curva Horizontal 90° EPC", m:"200×100 R300",w:"200",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"313001314",d:"Curva Horizontal 90° EPC", m:"300×100 R300",w:"300",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"314001314",d:"Curva Horizontal 90° EPC", m:"400×100 R300",w:"400",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"316001314",d:"Curva Horizontal 90° EPC", m:"600×100 R300",w:"600",g:"",l:"EPC",a:"HG",p:"expomin"},
+// Curva en T EG
+{c:"301002214",d:"Curva en T 90° EPC",       m:"100×100 R300",w:"100",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"302002214",d:"Curva en T 90° EPC",       m:"200×100 R300",w:"200",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"313004014",d:"Curva en T 90° EPC",       m:"300×100 R300",w:"300",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"414004014",d:"Curva en T 90° EPC",       m:"400×100 R300",w:"400",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"41601014", d:"Curva en T 90° EPC",       m:"600×100 R300",w:"600",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"411001814",d:"Tapa Curva en T 90° EPC",  m:"100×100 R300",w:"100",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"302003214",d:"Tapa Curva en T 90° EPC",  m:"200×100 R300",w:"200",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"303002214",d:"Tapa Curva en T 90° EPC",  m:"300×100 R300",w:"300",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"414001114",d:"Tapa Curva en T 90° EPC",  m:"400×100 R300",w:"400",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"416002814",d:"Tapa Curva en T 90° EPC",  m:"600×100 R300",w:"600",g:"",l:"EPC",a:"EG",p:"expomin"},
+// Curva en T HG
+{c:"411003214",d:"Curva en T 90° EPC",       m:"100×100 R300",w:"100",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"412001214",d:"Curva en T 90° EPC",       m:"200×100 R300",w:"200",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"413001014",d:"Curva en T 90° EPC",       m:"300×100 R300",w:"300",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"314001414",d:"Curva en T 90° EPC",       m:"400×100 R300",w:"400",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"316001414",d:"Curva en T 90° EPC",       m:"600×100 R300",w:"600",g:"",l:"EPC",a:"HG",p:"expomin"},
+// Curva en Cruz EG
+{c:"301002414",d:"Curva en Cruz 90° EPC",    m:"100×100 R300",w:"100",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"302002414",d:"Curva en Cruz 90° EPC",    m:"200×100 R300",w:"200",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"303001414",d:"Curva en Cruz 90° EPC",    m:"300×100 R300",w:"300",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"304002014",d:"Curva en Cruz 90° EPC",    m:"400×100 R300",w:"400",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"31601014", d:"Curva en Cruz 90° EPC",    m:"600×100 R300",w:"600",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"411001914",d:"Tapa Curva en Cruz 90° EPC",m:"100×100 R300",w:"100",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"302003414",d:"Tapa Curva en Cruz 90° EPC",m:"200×100 R300",w:"200",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"303002414",d:"Tapa Curva en Cruz 90° EPC",m:"300×100 R300",w:"300",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"304002414",d:"Tapa Curva en Cruz 90° EPC",m:"400×100 R300",w:"400",g:"",l:"EPC",a:"EG",p:"expomin"},
+{c:"416002914",d:"Tapa Curva en Cruz 90° EPC",m:"600×100 R300",w:"600",g:"",l:"EPC",a:"EG",p:"expomin"},
+// Curva en Cruz HG
+{c:"311001514",d:"Curva en Cruz 90° EPC",    m:"100×100 R300",w:"100",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"312001514",d:"Curva en Cruz 90° EPC",    m:"200×100 R300",w:"200",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"313001514",d:"Curva en Cruz 90° EPC",    m:"300×100 R300",w:"300",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"204001214",d:"Curva en Cruz 90° EPC",    m:"400×100 R300",w:"400",g:"",l:"EPC",a:"HG",p:"expomin"},
+{c:"316001514",d:"Curva en Cruz 90° EPC",    m:"600×100 R300",w:"600",g:"",l:"EPC",a:"HG",p:"expomin"},
+
+// ══════════════════════════════════════════════════════════════
+// EXPOMIN — BANDEJAS BPC/BRPC H100
+// ══════════════════════════════════════════════════════════════
+{c:"401021014",d:"Bandeja Lisa BPC",         m:"100×100×3000 1.5mm",w:"100",g:"e1.5mm",l:"BPC",a:"EG",p:"expomin"},
+{c:"512001414",d:"Bandeja Lisa BPC",         m:"200×100×3000 1.5mm",w:"200",g:"e1.5mm",l:"BPC",a:"EG",p:"expomin"},
+{c:"403021014",d:"Bandeja Lisa BPC",         m:"300×100×3000 1.5mm",w:"300",g:"e1.5mm",l:"BPC",a:"EG",p:"expomin"},
+{c:"414021014",d:"Bandeja Lisa BPC",         m:"400×100×3000 1.5mm",w:"400",g:"e1.5mm",l:"BPC",a:"EG",p:"expomin"},
+{c:"401061014",d:"Bandeja Ranurada BRPC",    m:"100×100×3000 1.5mm",w:"100",g:"e1.5mm",l:"BRPC",a:"EG",p:"expomin"},
+{c:"512001214",d:"Bandeja Ranurada BRPC",    m:"200×100×3000 1.5mm",w:"200",g:"e1.5mm",l:"BRPC",a:"EG",p:"expomin"},
+{c:"313003614",d:"Bandeja Ranurada BRPC",    m:"300×100×3000 1.5mm",w:"300",g:"e1.5mm",l:"BRPC",a:"EG",p:"expomin"},
+{c:"514001214",d:"Bandeja Ranurada BRPC",    m:"400×100×3000 1.5mm",w:"400",g:"e1.5mm",l:"BRPC",a:"EG",p:"expomin"},
+{c:"511021014",d:"Bandeja Ranurada BRPC",    m:"100×100×3000 1.5mm",w:"100",g:"e1.5mm",l:"BRPC",a:"HG",p:"expomin"},
+{c:"512021214",d:"Bandeja Ranurada BRPC",    m:"200×100×3000 1.5mm",w:"200",g:"e1.5mm",l:"BRPC",a:"HG",p:"expomin"},
+{c:"951130214",d:"Bandeja Ranurada BRPC",    m:"300×100×3000 1.5mm",w:"300",g:"e1.5mm",l:"BRPC",a:"HG",p:"expomin"},
+{c:"951140014",d:"Bandeja Ranurada BRPC",    m:"400×100×3000 1.5mm",w:"400",g:"e1.5mm",l:"BRPC",a:"HG",p:"expomin"},
+// Tapas BPC/BRPC H100
+{c:"404001214",d:"Tapa Bandeja BPC/BRPC",    m:"100×100×3000",w:"100",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"412001014",d:"Tapa Bandeja BPC/BRPC",    m:"200×100×3000",w:"200",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"403002014",d:"Tapa Bandeja BPC/BRPC",    m:"300×100×3000",w:"300",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"414001214",d:"Tapa Bandeja BPC/BRPC",    m:"400×100×3000",w:"400",g:"",l:"BPC",a:"EG",p:"expomin"},
+// CVI BPC H100 EG
+{c:"401021314",d:"Curva Vertical Interior 90° BPC",  m:"100×100 R200",w:"100",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"402041314",d:"Curva Vertical Interior 90° BPC",  m:"200×100 R200",w:"200",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"403001314",d:"Curva Vertical Interior 90° BPC",  m:"300×100 R200",w:"300",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"404021114",d:"Curva Vertical Interior 90° BPC",  m:"400×100 R200",w:"400",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"401041314",d:"Curva Vertical Exterior 90° BPC",  m:"100×100 R200",w:"100",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"402061314",d:"Curva Vertical Exterior 90° BPC",  m:"200×100 R200",w:"200",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"313003914",d:"Curva Vertical Exterior 90° BPC",  m:"300×100 R200",w:"300",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"404041314",d:"Curva Vertical Exterior 90° BPC",  m:"400×100 R200",w:"400",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"402001314",d:"Curva Horizontal 90° BPC",         m:"100×100 R200",w:"100",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"402001314",d:"Curva Horizontal 90° BPC",         m:"200×100 R200",w:"200",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"313003814",d:"Curva Horizontal 90° BPC",         m:"300×100 R200",w:"300",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"414051314",d:"Curva Horizontal 90° BPC",         m:"400×100 R200",w:"400",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"301001414",d:"Curva en T 90° BPC",               m:"100×100 R200",w:"100",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"302001414",d:"Curva en T 90° BPC",               m:"200×100 R200",w:"200",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"413002814",d:"Curva en T 90° BPC",               m:"300×100 R200",w:"300",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"404021614",d:"Curva en T 90° BPC",               m:"400×100 R200",w:"400",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"301001614",d:"Curva en Cruz 90° BPC",            m:"100×100 R200",w:"100",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"302001614",d:"Curva en Cruz 90° BPC",            m:"200×100 R200",w:"200",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"403021314",d:"Curva en Cruz 90° BPC",            m:"300×100 R200",w:"300",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"304001614",d:"Curva en Cruz 90° BPC",            m:"400×100 R200",w:"400",g:"",l:"BPC",a:"EG",p:"expomin"},
+
+// ══════════════════════════════════════════════════════════════
+// EXPOMIN — BANDEJAS BPC/BRPC H50
+// ══════════════════════════════════════════════════════════════
+{c:"401001014",d:"Bandeja Lisa BPC",         m:"100×50×3000 1.2mm",w:"100",g:"e1.2mm",l:"BPC",a:"EG",p:"expomin"},
+{c:"402001014",d:"Bandeja Lisa BPC",         m:"200×50×3000 1.2mm",w:"200",g:"e1.2mm",l:"BPC",a:"EG",p:"expomin"},
+{c:"403001014",d:"Bandeja Lisa BPC",         m:"300×50×3000 1.5mm",w:"300",g:"e1.5mm",l:"BPC",a:"EG",p:"expomin"},
+{c:"404001014",d:"Bandeja Lisa BPC",         m:"400×50×3000 1.5mm",w:"400",g:"e1.5mm",l:"BPC",a:"EG",p:"expomin"},
+{c:"501001014",d:"Bandeja Ranurada BRPC",    m:"100×50×3000 1.2mm",w:"100",g:"e1.2mm",l:"BRPC",a:"EG",p:"expomin"},
+{c:"502001014",d:"Bandeja Ranurada BRPC",    m:"200×50×3000 1.2mm",w:"200",g:"e1.2mm",l:"BRPC",a:"EG",p:"expomin"},
+{c:"503001014",d:"Bandeja Ranurada BRPC",    m:"300×50×3000 1.5mm",w:"300",g:"e1.5mm",l:"BRPC",a:"EG",p:"expomin"},
+{c:"504001014",d:"Bandeja Ranurada BRPC",    m:"400×50×3000 1.5mm",w:"400",g:"e1.5mm",l:"BRPC",a:"EG",p:"expomin"},
+{c:"412021014",d:"Bandeja Lisa BPC",         m:"200×50×3000 1.2mm",w:"200",g:"e1.2mm",l:"BPC",a:"HG",p:"expomin"},
+{c:"413041014",d:"Bandeja Lisa BPC",         m:"300×50×3000 1.5mm",w:"300",g:"e1.5mm",l:"BPC",a:"HG",p:"expomin"},
+{c:"511001014",d:"Bandeja Ranurada BRPC",    m:"100×50×3000 1.2mm",w:"100",g:"e1.2mm",l:"BRPC",a:"HG",p:"expomin"},
+{c:"512001014",d:"Bandeja Ranurada BRPC",    m:"200×50×3000 1.2mm",w:"200",g:"e1.2mm",l:"BRPC",a:"HG",p:"expomin"},
+{c:"513001014",d:"Bandeja Ranurada BRPC",    m:"300×50×3000 1.5mm",w:"300",g:"e1.5mm",l:"BRPC",a:"HG",p:"expomin"},
+{c:"514001014",d:"Bandeja Ranurada BRPC",    m:"400×50×3000 1.5mm",w:"400",g:"e1.5mm",l:"BRPC",a:"HG",p:"expomin"},
+// CVI/CVE/CH BPC H50 EG
+{c:"301051414",d:"Curva Vertical Interior 90° BPC",  m:"100×50 R200",w:"100",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"302003614",d:"Curva Vertical Interior 90° BPC",  m:"200×50 R200",w:"200",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"303051614",d:"Curva Vertical Interior 90° BPC",  m:"300×50 R200",w:"300",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"303052614",d:"Curva Vertical Interior 90° BPC",  m:"400×50 R200",w:"400",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"301051614",d:"Curva Vertical Exterior 90° BPC",  m:"100×50 R200",w:"100",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"302003814",d:"Curva Vertical Exterior 90° BPC",  m:"200×50 R200",w:"200",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"303051814",d:"Curva Vertical Exterior 90° BPC",  m:"300×50 R200",w:"300",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"303052814",d:"Curva Vertical Exterior 90° BPC",  m:"400×50 R200",w:"400",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"301051814",d:"Curva Horizontal 90° BPC",         m:"100×50 R200",w:"100",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"302004014",d:"Curva Horizontal 90° BPC",         m:"200×50 R200",w:"200",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"303052014",d:"Curva Horizontal 90° BPC",         m:"300×50 R200",w:"300",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"304001414",d:"Curva Horizontal 90° BPC",         m:"400×50 R200",w:"400",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"301051814",d:"Curva en T 90° BPC",               m:"100×50 R200",w:"100",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"302004014",d:"Curva en T 90° BPC",               m:"200×50 R200",w:"200",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"303052014",d:"Curva en T 90° BPC",               m:"300×50 R200",w:"300",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"304001414",d:"Curva en T 90° BPC",               m:"400×50 R200",w:"400",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"301052014",d:"Curva en Cruz 90° BPC",            m:"100×50 R200",w:"100",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"302004214",d:"Curva en Cruz 90° BPC",            m:"200×50 R200",w:"200",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"303052214",d:"Curva en Cruz 90° BPC",            m:"300×50 R200",w:"300",g:"",l:"BPC",a:"EG",p:"expomin"},
+{c:"304001614",d:"Curva en Cruz 90° BPC",            m:"400×50 R200",w:"400",g:"",l:"BPC",a:"EG",p:"expomin"},
+
+// ══════════════════════════════════════════════════════════════
+// MJM S.A. — ESCALERILLA EPC  (lateral 2.0mm / palillo 1.5mm)
+// ══════════════════════════════════════════════════════════════
+{c:"301001037",d:"Escalerilla EPC",          m:"100×100×3000 2.0/1.5mm",w:"100",g:"e2.0/1.5mm",l:"EPC",a:"EG",p:"mjm"},
+{c:"301501037",d:"Escalerilla EPC",          m:"150×100×3000 2.0/1.5mm",w:"150",g:"e2.0/1.5mm",l:"EPC",a:"EG",p:"mjm"},
+{c:"302001037",d:"Escalerilla EPC",          m:"200×100×3000 2.0/1.5mm",w:"200",g:"e2.0/1.5mm",l:"EPC",a:"EG",p:"mjm"},
+{c:"302501037",d:"Escalerilla EPC",          m:"250×100×3000 2.0/1.5mm",w:"250",g:"e2.0/1.5mm",l:"EPC",a:"EG",p:"mjm"},
+{c:"303001037",d:"Escalerilla EPC",          m:"300×100×3000 2.0/1.5mm",w:"300",g:"e2.0/1.5mm",l:"EPC",a:"EG",p:"mjm"},
+{c:"304001037",d:"Escalerilla EPC",          m:"400×100×3000 2.0/1.5mm",w:"400",g:"e2.0/1.5mm",l:"EPC",a:"EG",p:"mjm"},
+{c:"304501037",d:"Escalerilla EPC",          m:"450×100×3000 2.0/1.5mm",w:"450",g:"e2.0/1.5mm",l:"EPC",a:"EG",p:"mjm"},
+{c:"305001037",d:"Escalerilla EPC",          m:"500×100×3000 2.0/1.5mm",w:"500",g:"e2.0/1.5mm",l:"EPC",a:"EG",p:"mjm"},
+{c:"306001037",d:"Escalerilla EPC",          m:"600×100×3000 2.0/1.5mm",w:"600",g:"e2.0/1.5mm",l:"EPC",a:"EG",p:"mjm"},
+{c:"307001037",d:"Escalerilla EPC",          m:"700×100×3000 2.0/1.5mm",w:"700",g:"e2.0/1.5mm",l:"EPC",a:"EG",p:"mjm"},
+{c:"307501037",d:"Escalerilla EPC",          m:"750×100×3000 2.0/1.5mm",w:"750",g:"e2.0/1.5mm",l:"EPC",a:"EG",p:"mjm"},
+{c:"311001037",d:"Escalerilla EPC",          m:"100×100×3000 2.0/1.5mm",w:"100",g:"e2.0/1.5mm",l:"EPC",a:"HG",p:"mjm"},
+{c:"311501037",d:"Escalerilla EPC",          m:"150×100×3000 2.0/1.5mm",w:"150",g:"e2.0/1.5mm",l:"EPC",a:"HG",p:"mjm"},
+{c:"312001037",d:"Escalerilla EPC",          m:"200×100×3000 2.0/1.5mm",w:"200",g:"e2.0/1.5mm",l:"EPC",a:"HG",p:"mjm"},
+{c:"312501037",d:"Escalerilla EPC",          m:"250×100×3000 2.0/1.5mm",w:"250",g:"e2.0/1.5mm",l:"EPC",a:"HG",p:"mjm"},
+{c:"313001037",d:"Escalerilla EPC",          m:"300×100×3000 2.0/1.5mm",w:"300",g:"e2.0/1.5mm",l:"EPC",a:"HG",p:"mjm"},
+{c:"314001037",d:"Escalerilla EPC",          m:"400×100×3000 2.0/1.5mm",w:"400",g:"e2.0/1.5mm",l:"EPC",a:"HG",p:"mjm"},
+{c:"314501037",d:"Escalerilla EPC",          m:"450×100×3000 2.0/1.5mm",w:"450",g:"e2.0/1.5mm",l:"EPC",a:"HG",p:"mjm"},
+{c:"315001037",d:"Escalerilla EPC",          m:"500×100×3000 2.0/1.5mm",w:"500",g:"e2.0/1.5mm",l:"EPC",a:"HG",p:"mjm"},
+{c:"316001037",d:"Escalerilla EPC",          m:"600×100×3000 2.0/1.5mm",w:"600",g:"e2.0/1.5mm",l:"EPC",a:"HG",p:"mjm"},
+{c:"317001037",d:"Escalerilla EPC",          m:"700×100×3000 2.0/1.5mm",w:"700",g:"e2.0/1.5mm",l:"EPC",a:"HG",p:"mjm"},
+{c:"317501037",d:"Escalerilla EPC",          m:"750×100×3000 2.0/1.5mm",w:"750",g:"e2.0/1.5mm",l:"EPC",a:"HG",p:"mjm"},
+// Tapas MJM EPC
+{c:"301002037",d:"Tapa Escalerilla EPC",     m:"100×100×3000",w:"100",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"301502037",d:"Tapa Escalerilla EPC",     m:"150×100×3000",w:"150",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"302002037",d:"Tapa Escalerilla EPC",     m:"200×100×3000",w:"200",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"302502037",d:"Tapa Escalerilla EPC",     m:"250×100×3000",w:"250",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"303002037",d:"Tapa Escalerilla EPC",     m:"300×100×3000",w:"300",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"304002037",d:"Tapa Escalerilla EPC",     m:"400×100×3000",w:"400",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"305002037",d:"Tapa Escalerilla EPC",     m:"500×100×3000",w:"500",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"306002037",d:"Tapa Escalerilla EPC",     m:"600×100×3000",w:"600",g:"",l:"EPC",a:"EG",p:"mjm"},
+// CVI MJM EG
+{c:"301001137",d:"Curva Vertical Interior 90° EPC", m:"100×100 R200",w:"100",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"301501137",d:"Curva Vertical Interior 90° EPC", m:"150×100 R300",w:"150",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"302001137",d:"Curva Vertical Interior 90° EPC", m:"200×100 R300",w:"200",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"302501137",d:"Curva Vertical Interior 90° EPC", m:"250×100 R300",w:"250",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"303001137",d:"Curva Vertical Interior 90° EPC", m:"300×100 R300",w:"300",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"304001137",d:"Curva Vertical Interior 90° EPC", m:"400×100 R300",w:"400",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"305001137",d:"Curva Vertical Interior 90° EPC", m:"500×100 R300",w:"500",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"306001137",d:"Curva Vertical Interior 90° EPC", m:"600×100 R300",w:"600",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"311001137",d:"Curva Vertical Interior 90° EPC", m:"100×100 R200",w:"100",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"312001137",d:"Curva Vertical Interior 90° EPC", m:"200×100 R300",w:"200",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"313001137",d:"Curva Vertical Interior 90° EPC", m:"300×100 R300",w:"300",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"314001137",d:"Curva Vertical Interior 90° EPC", m:"400×100 R300",w:"400",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"316001137",d:"Curva Vertical Interior 90° EPC", m:"600×100 R300",w:"600",g:"",l:"EPC",a:"HG",p:"mjm"},
+// CVE MJM
+{c:"301001237",d:"Curva Vertical Exterior 90° EPC", m:"100×100 R200",w:"100",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"302001237",d:"Curva Vertical Exterior 90° EPC", m:"200×100 R300",w:"200",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"303001237",d:"Curva Vertical Exterior 90° EPC", m:"300×100 R300",w:"300",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"304001237",d:"Curva Vertical Exterior 90° EPC", m:"400×100 R300",w:"400",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"306001237",d:"Curva Vertical Exterior 90° EPC", m:"600×100 R300",w:"600",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"311001237",d:"Curva Vertical Exterior 90° EPC", m:"100×100 R200",w:"100",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"312001237",d:"Curva Vertical Exterior 90° EPC", m:"200×100 R300",w:"200",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"313001237",d:"Curva Vertical Exterior 90° EPC", m:"300×100 R300",w:"300",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"316001237",d:"Curva Vertical Exterior 90° EPC", m:"600×100 R300",w:"600",g:"",l:"EPC",a:"HG",p:"mjm"},
+// CH MJM
+{c:"301001337",d:"Curva Horizontal 90° EPC", m:"100×100 R200",w:"100",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"302001337",d:"Curva Horizontal 90° EPC", m:"200×100 R300",w:"200",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"303001337",d:"Curva Horizontal 90° EPC", m:"300×100 R300",w:"300",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"304001337",d:"Curva Horizontal 90° EPC", m:"400×100 R300",w:"400",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"306001337",d:"Curva Horizontal 90° EPC", m:"600×100 R300",w:"600",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"311001337",d:"Curva Horizontal 90° EPC", m:"100×100 R200",w:"100",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"312001337",d:"Curva Horizontal 90° EPC", m:"200×100 R300",w:"200",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"313001337",d:"Curva Horizontal 90° EPC", m:"300×100 R300",w:"300",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"316001337",d:"Curva Horizontal 90° EPC", m:"600×100 R300",w:"600",g:"",l:"EPC",a:"HG",p:"mjm"},
+// Curva en T MJM
+{c:"301001437",d:"Curva en T 90° EPC",       m:"100×100 R200",w:"100",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"302001437",d:"Curva en T 90° EPC",       m:"200×100 R300",w:"200",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"303001437",d:"Curva en T 90° EPC",       m:"300×100 R300",w:"300",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"304001437",d:"Curva en T 90° EPC",       m:"400×100 R300",w:"400",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"306001437",d:"Curva en T 90° EPC",       m:"600×100 R300",w:"600",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"311001437",d:"Curva en T 90° EPC",       m:"100×100 R200",w:"100",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"312001437",d:"Curva en T 90° EPC",       m:"200×100 R300",w:"200",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"313001437",d:"Curva en T 90° EPC",       m:"300×100 R300",w:"300",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"316001437",d:"Curva en T 90° EPC",       m:"600×100 R300",w:"600",g:"",l:"EPC",a:"HG",p:"mjm"},
+// Curva en Cruz MJM
+{c:"301001537",d:"Curva en Cruz 90° EPC",    m:"100×100 R200",w:"100",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"302001537",d:"Curva en Cruz 90° EPC",    m:"200×100 R300",w:"200",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"303001537",d:"Curva en Cruz 90° EPC",    m:"300×100 R300",w:"300",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"304001537",d:"Curva en Cruz 90° EPC",    m:"400×100 R300",w:"400",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"306001537",d:"Curva en Cruz 90° EPC",    m:"600×100 R300",w:"600",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"311001537",d:"Curva en Cruz 90° EPC",    m:"100×100 R200",w:"100",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"312001537",d:"Curva en Cruz 90° EPC",    m:"200×100 R300",w:"200",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"313001537",d:"Curva en Cruz 90° EPC",    m:"300×100 R300",w:"300",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"316001537",d:"Curva en Cruz 90° EPC",    m:"600×100 R300",w:"600",g:"",l:"EPC",a:"HG",p:"mjm"},
+
+// ══════════════════════════════════════════════════════════════
+// MJM — BANDEJAS BPC/BRPC H50
+// ══════════════════════════════════════════════════════════════
+{c:"401001037",d:"Bandeja Lisa BPC",         m:"100×50×3000 1.2mm",w:"100",g:"e1.2mm",l:"BPC",a:"EG",p:"mjm"},
+{c:"401501037",d:"Bandeja Lisa BPC",         m:"150×50×3000 1.2mm",w:"150",g:"e1.2mm",l:"BPC",a:"EG",p:"mjm"},
+{c:"402001037",d:"Bandeja Lisa BPC",         m:"200×50×3000 1.2mm",w:"200",g:"e1.2mm",l:"BPC",a:"EG",p:"mjm"},
+{c:"402501037",d:"Bandeja Lisa BPC",         m:"250×50×3000 1.2mm",w:"250",g:"e1.2mm",l:"BPC",a:"EG",p:"mjm"},
+{c:"403001037",d:"Bandeja Lisa BPC",         m:"300×50×3000 1.5mm",w:"300",g:"e1.5mm",l:"BPC",a:"EG",p:"mjm"},
+{c:"404001037",d:"Bandeja Lisa BPC",         m:"400×50×3000 1.5mm",w:"400",g:"e1.5mm",l:"BPC",a:"EG",p:"mjm"},
+{c:"411001037",d:"Bandeja Lisa BPC",         m:"100×50×3000 1.2mm",w:"100",g:"e1.2mm",l:"BPC",a:"HG",p:"mjm"},
+{c:"411501037",d:"Bandeja Lisa BPC",         m:"150×50×3000 1.2mm",w:"150",g:"e1.2mm",l:"BPC",a:"HG",p:"mjm"},
+{c:"412001037",d:"Bandeja Lisa BPC",         m:"200×50×3000 1.2mm",w:"200",g:"e1.2mm",l:"BPC",a:"HG",p:"mjm"},
+{c:"412501037",d:"Bandeja Lisa BPC",         m:"250×50×3000 1.2mm",w:"250",g:"e1.2mm",l:"BPC",a:"HG",p:"mjm"},
+{c:"413001037",d:"Bandeja Lisa BPC",         m:"300×50×3000 1.5mm",w:"300",g:"e1.5mm",l:"BPC",a:"HG",p:"mjm"},
+{c:"414001037",d:"Bandeja Lisa BPC",         m:"400×50×3000 1.5mm",w:"400",g:"e1.5mm",l:"BPC",a:"HG",p:"mjm"},
+{c:"501001037",d:"Bandeja Ranurada BRPC",    m:"100×50×3000 1.2mm",w:"100",g:"e1.2mm",l:"BRPC",a:"EG",p:"mjm"},
+{c:"501501037",d:"Bandeja Ranurada BRPC",    m:"150×50×3000 1.2mm",w:"150",g:"e1.2mm",l:"BRPC",a:"EG",p:"mjm"},
+{c:"502001037",d:"Bandeja Ranurada BRPC",    m:"200×50×3000 1.2mm",w:"200",g:"e1.2mm",l:"BRPC",a:"EG",p:"mjm"},
+{c:"502501037",d:"Bandeja Ranurada BRPC",    m:"250×50×3000 1.2mm",w:"250",g:"e1.2mm",l:"BRPC",a:"EG",p:"mjm"},
+{c:"503001037",d:"Bandeja Ranurada BRPC",    m:"300×50×3000 1.5mm",w:"300",g:"e1.5mm",l:"BRPC",a:"EG",p:"mjm"},
+{c:"504001037",d:"Bandeja Ranurada BRPC",    m:"400×50×3000 1.5mm",w:"400",g:"e1.5mm",l:"BRPC",a:"EG",p:"mjm"},
+{c:"511001037",d:"Bandeja Ranurada BRPC",    m:"100×50×3000 1.2mm",w:"100",g:"e1.2mm",l:"BRPC",a:"HG",p:"mjm"},
+{c:"511501037",d:"Bandeja Ranurada BRPC",    m:"150×50×3000 1.2mm",w:"150",g:"e1.2mm",l:"BRPC",a:"HG",p:"mjm"},
+{c:"512001037",d:"Bandeja Ranurada BRPC",    m:"200×50×3000 1.2mm",w:"200",g:"e1.2mm",l:"BRPC",a:"HG",p:"mjm"},
+{c:"512501037",d:"Bandeja Ranurada BRPC",    m:"250×50×3000 1.2mm",w:"250",g:"e1.2mm",l:"BRPC",a:"HG",p:"mjm"},
+{c:"513001037",d:"Bandeja Ranurada BRPC",    m:"300×50×3000 1.5mm",w:"300",g:"e1.5mm",l:"BRPC",a:"HG",p:"mjm"},
+{c:"514001037",d:"Bandeja Ranurada BRPC",    m:"400×50×3000 1.5mm",w:"400",g:"e1.5mm",l:"BRPC",a:"HG",p:"mjm"},
+// CVI BPC MJM H50
+{c:"401001137",d:"Curva Vertical Interior 90° BPC",  m:"100×50 R100",w:"100",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"402001137",d:"Curva Vertical Interior 90° BPC",  m:"200×50 R200",w:"200",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"403001137",d:"Curva Vertical Interior 90° BPC",  m:"300×50 R200",w:"300",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"404001137",d:"Curva Vertical Interior 90° BPC",  m:"400×50 R200",w:"400",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"411001137",d:"Curva Vertical Interior 90° BPC",  m:"100×50 R100",w:"100",g:"",l:"BPC",a:"HG",p:"mjm"},
+{c:"412001137",d:"Curva Vertical Interior 90° BPC",  m:"200×50 R200",w:"200",g:"",l:"BPC",a:"HG",p:"mjm"},
+{c:"413001137",d:"Curva Vertical Interior 90° BPC",  m:"300×50 R200",w:"300",g:"",l:"BPC",a:"HG",p:"mjm"},
+{c:"414001137",d:"Curva Vertical Interior 90° BPC",  m:"400×50 R200",w:"400",g:"",l:"BPC",a:"HG",p:"mjm"},
+{c:"401001237",d:"Curva Vertical Exterior 90° BPC",  m:"100×50 R100",w:"100",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"402001237",d:"Curva Vertical Exterior 90° BPC",  m:"200×50 R200",w:"200",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"403001237",d:"Curva Vertical Exterior 90° BPC",  m:"300×50 R200",w:"300",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"404001237",d:"Curva Vertical Exterior 90° BPC",  m:"400×50 R200",w:"400",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"401001337",d:"Curva Horizontal 90° BPC",         m:"100×50 R100",w:"100",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"402001337",d:"Curva Horizontal 90° BPC",         m:"200×50 R200",w:"200",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"403001337",d:"Curva Horizontal 90° BPC",         m:"300×50 R200",w:"300",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"404001337",d:"Curva Horizontal 90° BPC",         m:"400×50 R200",w:"400",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"401001437",d:"Curva en T 90° BPC",               m:"100×50 R100",w:"100",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"402001437",d:"Curva en T 90° BPC",               m:"200×50 R200",w:"200",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"403001437",d:"Curva en T 90° BPC",               m:"300×50 R200",w:"300",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"404001437",d:"Curva en T 90° BPC",               m:"400×50 R200",w:"400",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"401001537",d:"Curva en Cruz 90° BPC",            m:"100×50 R100",w:"100",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"402001537",d:"Curva en Cruz 90° BPC",            m:"200×50 R200",w:"200",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"403001537",d:"Curva en Cruz 90° BPC",            m:"300×50 R200",w:"300",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"404001537",d:"Curva en Cruz 90° BPC",            m:"400×50 R200",w:"400",g:"",l:"BPC",a:"EG",p:"mjm"},
+// BRPC curvas MJM H50
+{c:"501001137",d:"Curva Vertical Interior 90° BRPC", m:"100×50 R100",w:"100",g:"",l:"BRPC",a:"EG",p:"mjm"},
+{c:"502001137",d:"Curva Vertical Interior 90° BRPC", m:"200×50 R200",w:"200",g:"",l:"BRPC",a:"EG",p:"mjm"},
+{c:"503001137",d:"Curva Vertical Interior 90° BRPC", m:"300×50 R200",w:"300",g:"",l:"BRPC",a:"EG",p:"mjm"},
+{c:"504001137",d:"Curva Vertical Interior 90° BRPC", m:"400×50 R200",w:"400",g:"",l:"BRPC",a:"EG",p:"mjm"},
+{c:"501001237",d:"Curva Vertical Exterior 90° BRPC", m:"100×50 R100",w:"100",g:"",l:"BRPC",a:"EG",p:"mjm"},
+{c:"502001237",d:"Curva Vertical Exterior 90° BRPC", m:"200×50 R200",w:"200",g:"",l:"BRPC",a:"EG",p:"mjm"},
+{c:"503001237",d:"Curva Vertical Exterior 90° BRPC", m:"300×50 R200",w:"300",g:"",l:"BRPC",a:"EG",p:"mjm"},
+{c:"504001237",d:"Curva Vertical Exterior 90° BRPC", m:"400×50 R200",w:"400",g:"",l:"BRPC",a:"EG",p:"mjm"},
+{c:"501001337",d:"Curva Horizontal 90° BRPC",        m:"100×50 R100",w:"100",g:"",l:"BRPC",a:"EG",p:"mjm"},
+{c:"502001337",d:"Curva Horizontal 90° BRPC",        m:"200×50 R200",w:"200",g:"",l:"BRPC",a:"EG",p:"mjm"},
+{c:"503001337",d:"Curva Horizontal 90° BRPC",        m:"300×50 R200",w:"300",g:"",l:"BRPC",a:"EG",p:"mjm"},
+{c:"504001337",d:"Curva Horizontal 90° BRPC",        m:"400×50 R200",w:"400",g:"",l:"BRPC",a:"EG",p:"mjm"},
+{c:"501001437",d:"Curva en T 90° BRPC",              m:"100×50 R100",w:"100",g:"",l:"BRPC",a:"EG",p:"mjm"},
+{c:"502001437",d:"Curva en T 90° BRPC",              m:"200×50 R200",w:"200",g:"",l:"BRPC",a:"EG",p:"mjm"},
+{c:"503001437",d:"Curva en T 90° BRPC",              m:"300×50 R200",w:"300",g:"",l:"BRPC",a:"EG",p:"mjm"},
+{c:"501001537",d:"Curva en Cruz 90° BRPC",           m:"100×50 R100",w:"100",g:"",l:"BRPC",a:"EG",p:"mjm"},
+{c:"502001537",d:"Curva en Cruz 90° BRPC",           m:"200×50 R200",w:"200",g:"",l:"BRPC",a:"EG",p:"mjm"},
+{c:"503001537",d:"Curva en Cruz 90° BRPC",           m:"300×50 R200",w:"300",g:"",l:"BRPC",a:"EG",p:"mjm"},
+
+// ══════════════════════════════════════════════════════════════
+// MJM — ACCESORIOS
+// ══════════════════════════════════════════════════════════════
+{c:"300001037",d:"Eclisa EPC Recta con Pernos",      m:"70×200 2.0mm",w:"70",g:"e2.0mm",l:"Accesorio",a:"EG",p:"mjm"},
+{c:"310001037",d:"Eclisa EPC Recta con Pernos",      m:"70×200 2.0mm",w:"70",g:"e2.0mm",l:"Accesorio",a:"HG",p:"mjm"},
+{c:"401003037",d:"Eclisa BPC/BRPC con Pernos",       m:"120×50 1.5mm",w:"120",g:"e1.5mm",l:"Accesorio",a:"EG",p:"mjm"},
+{c:"411003037",d:"Eclisa BPC/BRPC con Pernos",       m:"120×50 1.5mm",w:"120",g:"e1.5mm",l:"Accesorio",a:"HG",p:"mjm"},
+{c:"301009037",d:"Separador EPC H:100",               m:"3000 1.5mm",w:"",g:"e1.5mm",l:"Accesorio",a:"EG",p:"mjm"},
+{c:"311009037",d:"Separador EPC H:100",               m:"3000 1.5mm",w:"",g:"e1.5mm",l:"Accesorio",a:"HG",p:"mjm"},
+{c:"401009037",d:"Separador BPC/BRPC H:50",           m:"3000 1.5mm",w:"",g:"e1.5mm",l:"Accesorio",a:"EG",p:"mjm"},
+{c:"411009037",d:"Separador BPC/BRPC H:50",           m:"3000 1.5mm",w:"",g:"e1.5mm",l:"Accesorio",a:"HG",p:"mjm"},
+
+// ══════════════════════════════════════════════════════════════
+// MJM — RIELES
+// ══════════════════════════════════════════════════════════════
+{c:"337400237",d:"Riel RT-RC",               m:"19×35×3000 1.5mm",w:"19",g:"e1.5mm",l:"Riel",a:"EG",p:"mjm"},
+{c:"337410437",d:"Riel RT-RC",               m:"19×35×3000 1.5mm",w:"19",g:"e1.5mm",l:"Riel",a:"HG",p:"mjm"},
+{c:"337400437",d:"Riel RT-RC",               m:"19×35×3000 2.0mm",w:"19",g:"e2.0mm",l:"Riel",a:"EG",p:"mjm"},
+{c:"337410237",d:"Riel RT-RC",               m:"19×35×3000 2.0mm",w:"19",g:"e2.0mm",l:"Riel",a:"HG",p:"mjm"},
+{c:"337400637",d:"Riel RT-RC",               m:"35×35×3000 1.5mm",w:"35",g:"e1.5mm",l:"Riel",a:"EG",p:"mjm"},
+{c:"337410637",d:"Riel RT-RC",               m:"35×35×3000 1.5mm",w:"35",g:"e1.5mm",l:"Riel",a:"HG",p:"mjm"},
+{c:"337400837",d:"Riel RT-RC",               m:"35×35×3000 2.0mm",w:"35",g:"e2.0mm",l:"Riel",a:"EG",p:"mjm"},
+{c:"337410837",d:"Riel RT-RC",               m:"35×35×3000 2.0mm",w:"35",g:"e2.0mm",l:"Riel",a:"HG",p:"mjm"},
+{c:"337401037",d:"Riel RUC P-1000",          m:"42×35×3000 2.0mm",w:"42",g:"e2.0mm",l:"Riel",a:"EG",p:"mjm"},
+{c:"337411037",d:"Riel RUC P-1000",          m:"42×35×3000 2.0mm",w:"42",g:"e2.0mm",l:"Riel",a:"HG",p:"mjm"},
+{c:"337401237",d:"Riel RUC P-1000",          m:"42×35×3000 2.5mm",w:"42",g:"e2.5mm",l:"Riel",a:"EG",p:"mjm"},
+{c:"337411237",d:"Riel RUC P-1000",          m:"42×35×3000 2.5mm",w:"42",g:"e2.5mm",l:"Riel",a:"HG",p:"mjm"},
+{c:"337401437",d:"Riel RUC P-1000",          m:"42×42×3000 2.0mm",w:"42",g:"e2.0mm",l:"Riel",a:"EG",p:"mjm"},
+{c:"337411437",d:"Riel RUC P-1000",          m:"42×42×3000 2.0mm",w:"42",g:"e2.0mm",l:"Riel",a:"HG",p:"mjm"},
+{c:"337401637",d:"Riel RUC P-1000",          m:"42×42×3000 2.5mm",w:"42",g:"e2.5mm",l:"Riel",a:"EG",p:"mjm"},
+{c:"337411637",d:"Riel RUC P-1000",          m:"42×42×3000 2.5mm",w:"42",g:"e2.5mm",l:"Riel",a:"HG",p:"mjm"},
+{c:"337403537",d:"Riel DIN Simétrico Omega", m:"290mm",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337403037",d:"Riel DIN Simétrico Omega", m:"1000mm",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337525037",d:"Hilo Corrido Acero",       m:"1/4\"×1000",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337525537",d:"Hilo Corrido Acero",       m:"5/16\"×1000",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337526037",d:"Hilo Corrido Acero",       m:"3/8\"×1000",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337526537",d:"Hilo Corrido Acero",       m:"1/2\"×1000",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337527037",d:"Hilo Corrido Acero",       m:"5/8\"×1000",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337527537",d:"Copla Unión Hilo Corrido", m:"1/4\"",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337528037",d:"Copla Unión Hilo Corrido", m:"5/16\"",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337528537",d:"Copla Unión Hilo Corrido", m:"3/8\"",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337529037",d:"Copla Unión Hilo Corrido", m:"1/2\"",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337529537",d:"Copla Unión Hilo Corrido", m:"5/8\"",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337530037",d:"Mordaza Fijación Riel 35mm",m:"perno 1/4\" ø7.5",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337530537",d:"Mordaza Fijación Riel 35mm",m:"perno 5/16\" ø9",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337531037",d:"Mordaza Fijación Riel 35mm",m:"perno 3/8\" ø11",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337531537",d:"Mordaza Fijación Riel 35mm",m:"perno 1/2\" ø14",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337539537",d:"Mordaza Fijación Riel 42mm",m:"perno 1/4\" ø7.5",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337532037",d:"Mordaza Fijación Riel 42mm",m:"perno 5/16\" ø9",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337532537",d:"Mordaza Fijación Riel 42mm",m:"perno 3/8\" ø11",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337533037",d:"Mordaza Fijación Riel 42mm",m:"perno 1/2\" ø14",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337533537",d:"Tuerca Riel Simple 35mm",  m:"1/4\"",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337534037",d:"Tuerca Riel Simple 35mm",  m:"5/16\"",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337534537",d:"Tuerca Riel Simple 35mm",  m:"3/8\"",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337535037",d:"Tuerca Riel Simple 42mm",  m:"1/4\"",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337537537",d:"Tuerca Riel c/Resorte 42mm",m:"1/4\"",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337536037",d:"Tuerca Riel Simple 42mm",  m:"3/8\"",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337538037",d:"Tuerca Riel c/Resorte 42mm",m:"3/8\"",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337536537",d:"Tuerca Riel Simple 42mm",  m:"1/2\"",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337538537",d:"Tuerca Riel c/Resorte 42mm",m:"1/2\"",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337537037",d:"Tuerca Riel Simple 42mm",  m:"5/8\"",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+{c:"337539037",d:"Tuerca Riel c/Resorte 42mm",m:"5/8\"",w:"",g:"",l:"Riel",a:"EG",p:"mjm"},
+
+// ══════════════════════════════════════════════════════════════
+// MJM — ABRAZADERAS
+// ══════════════════════════════════════════════════════════════
+{c:"337567637",d:"Abrazadera Tubería 1PT",   m:"5/8\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337568037",d:"Abrazadera Tubería 1PT",   m:"3/4\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337568237",d:"Abrazadera Tubería 1PT",   m:"1\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337567037",d:"Abrazadera Tubería 2PT",   m:"5/8\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337567237",d:"Abrazadera Tubería 2PT",   m:"3/4\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337567437",d:"Abrazadera Tubería 2PT",   m:"1\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337572037",d:"Abrazadera Cañería 1PC",   m:"1/2\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337572237",d:"Abrazadera Cañería 1PC",   m:"3/4\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337572437",d:"Abrazadera Cañería 1PC",   m:"1\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337572637",d:"Abrazadera Cañería 1PC",   m:"1.1/4\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337572837",d:"Abrazadera Cañería 1PC",   m:"1.1/2\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337569037",d:"Abrazadera Cañería 2PC",   m:"1/2\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337569237",d:"Abrazadera Cañería 2PC",   m:"3/4\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337569437",d:"Abrazadera Cañería 2PC",   m:"1\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337569637",d:"Abrazadera Cañería 2PC",   m:"1.1/4\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337569837",d:"Abrazadera Cañería 2PC",   m:"1.1/2\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337570037",d:"Abrazadera Cañería 2PC",   m:"2\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337570237",d:"Abrazadera Cañería 2PC",   m:"2.1/2\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337570437",d:"Abrazadera Cañería 2PC",   m:"3\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337570637",d:"Abrazadera Cañería 2PC",   m:"4\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337543037",d:"Abrazadera Cañería 2PC",   m:"1/2\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337543237",d:"Abrazadera Cañería 2PC",   m:"3/4\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337543437",d:"Abrazadera Cañería 2PC",   m:"1\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337543637",d:"Abrazadera Cañería 2PC",   m:"1.1/4\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337543837",d:"Abrazadera Cañería 2PC",   m:"1.1/2\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337544037",d:"Abrazadera Cañería 2PC",   m:"2\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337544237",d:"Abrazadera Cañería 2PC",   m:"2.1/2\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337544437",d:"Abrazadera Cañería 2PC",   m:"3\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337544637",d:"Abrazadera Cañería 2PC",   m:"4\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337560037",d:"Abrazadera Riel Tubería RT",m:"5/8\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337560237",d:"Abrazadera Riel Tubería RT",m:"3/4\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337560437",d:"Abrazadera Riel Tubería RT",m:"1\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337561037",d:"Abrazadera Riel Cañería RC",m:"1/2\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337561237",d:"Abrazadera Riel Cañería RC",m:"3/4\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337561437",d:"Abrazadera Riel Cañería RC",m:"1\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337561637",d:"Abrazadera Riel Cañería RC",m:"1.1/4\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337561837",d:"Abrazadera Riel Cañería RC",m:"1.1/2\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337562037",d:"Abrazadera Riel Cañería RC",m:"2\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337562237",d:"Abrazadera Riel Cañería RC",m:"2.1/2\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337562437",d:"Abrazadera Riel Cañería RC",m:"3\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337562637",d:"Abrazadera Riel Cañería RC",m:"4\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337541037",d:"Abrazadera Riel Cañería RC",m:"1/2\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337541237",d:"Abrazadera Riel Cañería RC",m:"3/4\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337541437",d:"Abrazadera Riel Cañería RC",m:"1\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337541637",d:"Abrazadera Riel Cañería RC",m:"1.1/4\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337541837",d:"Abrazadera Riel Cañería RC",m:"1.1/2\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337542037",d:"Abrazadera Riel Cañería RC",m:"2\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337542237",d:"Abrazadera Riel Cañería RC",m:"2.1/2\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337542437",d:"Abrazadera Riel Cañería RC",m:"3\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337542637",d:"Abrazadera Riel Cañería RC",m:"4\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337654037",d:"Abrazadera RUC U4242",     m:"1/2\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337564237",d:"Abrazadera RUC U4242",     m:"3/4\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337564437",d:"Abrazadera RUC U4242",     m:"1\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337564637",d:"Abrazadera RUC U4242",     m:"1.1/4\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337564837",d:"Abrazadera RUC U4242",     m:"1.1/2\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337565037",d:"Abrazadera RUC U4242",     m:"2\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337565237",d:"Abrazadera RUC U4242",     m:"2.1/2\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337565437",d:"Abrazadera RUC U4242",     m:"3\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337565637",d:"Abrazadera RUC U4242",     m:"4\"",w:"",g:"",l:"Abrazadera",a:"EG",p:"mjm"},
+{c:"337546537",d:"Abrazadera RUC U4242",     m:"1/2\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337547037",d:"Abrazadera RUC U4242",     m:"3/4\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337547537",d:"Abrazadera RUC U4242",     m:"1\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337548037",d:"Abrazadera RUC U4242",     m:"1.1/4\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337548537",d:"Abrazadera RUC U4242",     m:"1.1/2\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337559037",d:"Abrazadera RUC U4242",     m:"2\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337549537",d:"Abrazadera RUC U4242",     m:"2.1/2\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337550037",d:"Abrazadera RUC U4242",     m:"3\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+{c:"337550537",d:"Abrazadera RUC U4242",     m:"4\"",w:"",g:"",l:"Abrazadera",a:"HG",p:"mjm"},
+
+// ══════════════════════════════════════════════════════════════
+// MJM — CAJAS DE DERIVACIÓN
+// ══════════════════════════════════════════════════════════════
+{c:"117501437",d:"Caja Universal CHUQUI",    m:"118×76×40",w:"118",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117502737",d:"Caja Universal A-01",      m:"100×65×65",w:"100",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117522737",d:"Caja Universal A-01",      m:"100×65×65",w:"100",g:"",l:"Caja",a:"HG",p:"mjm"},
+{c:"117504237",d:"Caja Universal A-11",      m:"100×100×65",w:"100",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117524237",d:"Caja Universal A-11",      m:"100×100×65",w:"100",g:"",l:"Caja",a:"HG",p:"mjm"},
+{c:"117507237",d:"Caja Universal B-12",      m:"200×100×100",w:"200",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117527237",d:"Caja Universal B-12",      m:"200×100×100",w:"200",g:"",l:"Caja",a:"HG",p:"mjm"},
+{c:"117505737",d:"Caja Universal B-15",      m:"150×150×100",w:"150",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117525737",d:"Caja Universal B-15",      m:"150×150×100",w:"150",g:"",l:"Caja",a:"HG",p:"mjm"},
+{c:"117508737",d:"Caja Universal B-22",      m:"200×200×100",w:"200",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117528737",d:"Caja Universal B-22",      m:"200×200×100",w:"200",g:"",l:"Caja",a:"HG",p:"mjm"},
+{c:"117510237",d:"Caja Universal B-23",      m:"300×200×100",w:"300",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117530237",d:"Caja Universal B-23",      m:"300×200×100",w:"300",g:"",l:"Caja",a:"HG",p:"mjm"},
+{c:"117513237",d:"Caja Universal B-34",      m:"400×300×100",w:"400",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117533237",d:"Caja Universal B-34",      m:"400×300×100",w:"400",g:"",l:"Caja",a:"HG",p:"mjm"},
+{c:"117511737",d:"Caja Universal C-23",      m:"300×200×150",w:"300",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117533737",d:"Caja Universal C-23",      m:"300×200×150",w:"300",g:"",l:"Caja",a:"HG",p:"mjm"},
+{c:"117514737",d:"Caja Universal C-34",      m:"400×300×150",w:"400",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117534737",d:"Caja Universal C-34",      m:"400×300×150",w:"400",g:"",l:"Caja",a:"HG",p:"mjm"},
+{c:"117517537",d:"Caja NEMA",                m:"100×100×75",w:"100",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117518037",d:"Caja NEMA",                m:"100×100×100",w:"100",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117518537",d:"Caja NEMA",                m:"150×100×100",w:"150",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117519037",d:"Caja NEMA",                m:"150×150×100",w:"150",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117519537",d:"Caja NEMA",                m:"200×100×100",w:"200",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117520037",d:"Caja NEMA",                m:"200×150×100",w:"200",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117520537",d:"Caja NEMA",                m:"250×150×100",w:"250",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117521037",d:"Caja NEMA",                m:"300×150×100",w:"300",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117521537",d:"Caja NEMA",                m:"300×200×100",w:"300",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117515037",d:"Caja Especial Poste",      m:"200×130×100",w:"200",g:"",l:"Caja",a:"HG",p:"mjm"},
+{c:"117516037",d:"Caja Especial Tipo B",     m:"730×720×200",w:"730",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117516537",d:"Caja Especial Tipo C",     m:"520×640×240",w:"520",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117515537",d:"Caja Especial Tipo C Salida 2\"",m:"520×640×240",w:"520",g:"",l:"Caja",a:"EG",p:"mjm"},
+{c:"117517037",d:"Caja Especial Tipo D",     m:"290×430×190",w:"290",g:"",l:"Caja",a:"EG",p:"mjm"},
+];
+
+// ─── BÚSQUEDA ────────────────────────────────────────────────────────────────
+// Mapas de sinónimos: el token del usuario → lo que buscamos en el haystack
+const SYNS = {
+  'esc':'escalerilla','escal':'escalerilla','escalerilla':'escalerilla',
+  'band':'bandeja','bandeja':'bandeja',
+  'epc':'epc','bpc':'bpc','brpc':'brpc',
+  'cvi':'interior','cve':'exterior',
+  'ch':'horizontal','cv':'vertical',
+  'curva':'curva','tapa':'tapa',
+  'cruz':'cruz','x':'cruz',
+  'tee':'en t',
+  'eg':'eg','hg':'hg',
+  'expomin':'expomin','mjm':'mjm',
+  'riel':'riel','abraz':'abrazadera','caja':'caja','acc':'accesorio',
+};
+
+const selected = new Set();
+let visibleRows = [];
+
+function buildHay(p) {
+  const lineAlias = {
+    'EPC':'escalerilla epc',
+    'BPC':'bandeja lisa bpc',
+    'BRPC':'bandeja ranurada brpc',
+    'Riel':'riel',
+    'Abrazadera':'abrazadera',
+    'Caja':'caja derivacion',
+    'Accesorio':'accesorio eclisa separador',
+  };
+  // IMPORTANTE: NO incluimos p.m completo para evitar falsos positivos numéricos.
+  // Los números dimensionales solo deben matchear contra p.w (ancho exacto).
+  // Las medidas de abrazaderas/rieles (pulgadas) sí se incluyen directamente en p.m.
+  const medStr = p.w ? `w${p.w}` : p.m; // prefijamos el ancho con "w" para isolarlo
+  return [
+    p.c, p.d, medStr, p.g,
+    p.l, lineAlias[p.l]||'',
+    p.a, p.a==='EG'?'electrogalvanizado':'galvanizado caliente',
+    p.p, p.p==='expomin'?'comercial expomin':'mjm sa',
+    // incluir medida de pulg para abrazaderas/rieles
+    !p.w ? p.m : '',
+  ].join(' ').toLowerCase();
+}
+
+function matchWidth(token, p) {
+  if (!p.w) return false;
+  // Comparación por prefijo: "1" → 100,150 / "10" → 100 / "100" → 100 / "2" → 200,250
+  return p.w.startsWith(token);
+}
+
+function render() {
+  const q     = document.getElementById('searchInput').value.toLowerCase().trim();
+  const fProv = document.getElementById('filterProveedor').value;
+  const fLin  = document.getElementById('filterLinea').value;
+  const fAcab = document.getElementById('filterAcabado').value;
+
+  // Separar por espacios, luego también dividir tokens tipo "100x100" → ["100","100"]
+  const rawTokens = q.split(/\s+/).filter(Boolean).flatMap(t => {
+    // si es algo como 100x100 o 200x50 lo separamos por x
+    if (/^\d+x\d*$/i.test(t)) return t.toLowerCase().split('x').filter(Boolean);
+    // si termina en x (100x) solo tomamos el número
+    if (/^\d+x$/i.test(t)) return [t.replace(/x$/i,'')];
+    return [t];
+  });
+
+  const filtered = P.filter(p => {
+    if (fProv && p.p !== fProv) return false;
+    if (fLin  && p.l !== fLin)  return false;
+    if (fAcab && p.a !== fAcab) return false;
+    if (!rawTokens.length) return true;
+
+    const hay = buildHay(p);
+
+    return rawTokens.every(raw => {
+      // Tokens puramente numéricos → comparación exacta de ancho
+      if (/^\d+$/.test(raw)) return matchWidth(raw, p);
+      // Resto → expandir sinónimos y buscar en haystack
+      const t = SYNS[raw] || raw;
+      return hay.includes(t);
+    });
+  });
+
+  visibleRows = filtered;
+  const cnt = filtered.length;
+  document.getElementById('countBadge').textContent = cnt + ' producto' + (cnt !== 1 ? 's' : '');
+  const hc = document.getElementById('header-count');
+  if (hc) hc.textContent = cnt + ' producto' + (cnt !== 1 ? 's' : '');
+  const ff = document.getElementById('footer-float-count');
+  if (ff) ff.textContent = cnt + ' resultado' + (cnt !== 1 ? 's' : '');
+
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+
+  if (!filtered.length) {
+    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('productTable').style.display = 'none';
+    return;
+  }
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('productTable').style.display = '';
+
+  filtered.forEach(prod => {
+    const tr = document.createElement('tr');
+    if (selected.has(prod.c)) tr.classList.add('selected');
+    tr.innerHTML = `
+      <td><input type="checkbox" data-code="${prod.c}" ${selected.has(prod.c)?'checked':''}></td>
+      <td class="code">${prod.c}</td>
+      <td class="desc-cell">
+        <div class="desc-line">
+          <span class="desc-text">${prod.d} — ${prod.m}</span>
+          <span class="tag tag-${prod.a.toLowerCase()}">${prod.a}</span>
+        </div>
+      </td>
+      <td><span class="badge-src badge-${prod.p}">${prod.p==='expomin'?'Expomin':'MJM S.A.'}</span></td>
+      <td><button class="btn-copy-row" onclick="copyOne('${prod.c}',this)">📋 Copiar</button></td>
+    `;
+    tr.querySelector('input[type="checkbox"]').addEventListener('change', function() {
+      if (this.checked) { selected.add(prod.c); tr.classList.add('selected'); }
+      else              { selected.delete(prod.c); tr.classList.remove('selected'); }
+      updateCopyBar();
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+function copyOne(code, btn) {
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = '✓ Copiado';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 Copiar'; btn.classList.remove('copied'); }, 1800);
+  });
+}
+
+function selectAll() {
+  visibleRows.forEach(p => selected.add(p.c));
+  render(); updateCopyBar();
+}
+function clearSelection() {
+  selected.clear(); render(); updateCopyBar();
+}
+function updateCopyBar() {
+  const codes = Array.from(selected);
+  const bar = document.getElementById('copyBar');
+  if (!codes.length) { bar.classList.remove('visible'); return; }
+  bar.classList.add('visible');
+  document.getElementById('copyCount').textContent = codes.length;
+  document.getElementById('codesPreview').textContent = codes.join('\t');
+}
+function copyCodes() {
+  const codes = Array.from(selected);
+  if (!codes.length) return;
+  navigator.clipboard.writeText(codes.join('\t')).then(() => {
+    const t = document.getElementById('copyToast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  });
+}
+
+document.getElementById('searchInput').addEventListener('input', render);
+document.getElementById('filterProveedor').addEventListener('change', render);
+document.getElementById('filterLinea').addEventListener('change', render);
+document.getElementById('filterAcabado').addEventListener('change', render);
+
+render();
+
+  function resetAll() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('filterProveedor').value = '';
+    document.getElementById('filterLinea').value = '';
+    document.getElementById('filterAcabado').value = '';
+    selected.clear();
+    updateCopyBar();
+    render();
+  }
+
+  function toggleDark() {
+    const body = document.body;
+    const btn = document.getElementById('dark-toggle');
+    body.classList.toggle('dark-mode');
+    const isDark = body.classList.contains('dark-mode');
+    btn.textContent = isDark ? '☀️ Claro' : '🌙 Oscuro';
+    localStorage.setItem('darkMode', isDark ? '1' : '0');
+  }
+  if (localStorage.getItem('darkMode') === '1') {
+    document.body.classList.add('dark-mode');
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('dark-toggle');
+      if (btn) btn.textContent = '☀️ Claro';
+    });
+  }
+
+  function openSug() {
+    document.getElementById('sug-overlay').classList.add('active');
+    document.getElementById('sug-form-area').style.display = 'block';
+    document.getElementById('sug-success').style.display = 'none';
+    document.getElementById('sug-msg').value = '';
+    document.getElementById('sug-nombre').value = '';
+  }
+  function closeSug() {
+    document.getElementById('sug-overlay').classList.remove('active');
+  }
+  async function sendSug() {
+    const msg = document.getElementById('sug-msg').value.trim();
+    const nombre = document.getElementById('sug-nombre').value.trim();
+    if (!msg) { document.getElementById('sug-msg').focus(); return; }
+    const btn = document.getElementById('sug-btn');
+    btn.disabled = true; btn.textContent = 'Enviando...';
+    try {
+      const res = await fetch('https://formspree.io/f/xkoepqyr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ nombre: nombre || 'Anónimo', mensaje: msg, _subject: 'Sugerencia Portaconductores Dartel' })
+      });
+      if (res.ok) {
+        document.getElementById('sug-form-area').style.display = 'none';
+        document.getElementById('sug-success').style.display = 'block';
+      } else { alert('Error al enviar. Intenta más tarde.'); }
+    } catch(e) { alert('Sin conexión.'); }
+    btn.disabled = false; btn.textContent = '✉️ Enviar';
+  }
+  // cerrar overlay con click fuera
+  document.getElementById('sug-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeSug();
+  });
+
+</script>
+</body>
+</html>
