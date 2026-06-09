@@ -51,89 +51,120 @@
   .header-info p { color: rgba(255,255,255,.75); font-size: 12px; margin-top: 1px; }
   .header-count { background: rgba(255,255,255,.18); color: #fff; font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 20px; white-space: nowrap; }
 
+  /* ── CONTROLES ── */
   .controls {
-    background: var(--surface); padding: 14px 24px; border-bottom: 1px solid var(--border);
-    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
-    position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    background: var(--surface); padding: 10px 20px; border-bottom: 1px solid var(--border);
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    position: sticky; top: 62px; z-index: 50; box-shadow: 0 2px 6px rgba(0,0,0,.06);
   }
-  .search-wrap { position: relative; flex: 1; min-width: 260px; }
-  .search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+  .search-wrap { position: relative; flex: 1; min-width: 240px; }
+  .search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; width:15px;height:15px; }
   #searchInput {
-    width: 100%; padding: 9px 12px 9px 34px; border: 1.5px solid var(--border);
-    border-radius: var(--radius); font-size: 14px; color: var(--text);
+    width: 100%; padding: 7px 10px 7px 32px; border: 1.5px solid var(--border);
+    border-radius: 8px; font-size: 13.5px; color: var(--text);
     background: var(--surface2); outline: none; transition: border-color .15s;
   }
-  #searchInput:focus { border-color: var(--accent2); background: #fff; }
+  #searchInput:focus { border-color: var(--accent2); background: var(--surface); }
   select {
-    padding: 9px 28px 9px 10px; border: 1.5px solid var(--border);
-    border-radius: var(--radius); font-size: 13px; color: var(--text);
+    padding: 7px 26px 7px 10px; border: 1.5px solid var(--border);
+    border-radius: 8px; font-size: 12.5px; color: var(--text);
     background: var(--surface2); appearance: none; cursor: pointer;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236B7280' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath fill='%236B7280' d='M5 7L0 0h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat; background-position: right 9px center; outline: none;
+    transition: border-color .15s;
   }
   select:focus { border-color: var(--accent2); }
-  .count-badge { background: var(--accent2); color: #fff; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
-  .btn-sel-all { padding: 8px 14px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: var(--radius); font-size: 12px; cursor: pointer; color: var(--muted); transition: all .15s; white-space: nowrap; }
+  .count-badge { background: var(--accent2); color: #fff; font-size: 11.5px; font-weight: 700; padding: 4px 12px; border-radius: 20px; white-space: nowrap; letter-spacing: .02em; }
+  .btn-sel-all { padding: 7px 13px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; font-size: 12px; cursor: pointer; color: var(--muted); transition: all .15s; white-space: nowrap; }
   .btn-sel-all:hover { border-color: var(--accent2); color: var(--accent2); }
 
-  .table-wrap { padding: 20px 24px 110px; overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
-  thead { background: var(--accent2); }
-  thead th { color: rgba(255,255,255,.9); font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; padding: 11px 12px; text-align: left; white-space: nowrap; }
-  thead th:first-child { width: 36px; }
-  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: var(--surface2); }
-  tbody tr.selected { background: #EEF4FF; }
-  td { padding: 9px 12px; vertical-align: middle; }
+  /* ── LISTA FLEX (reemplaza tabla) ── */
+  .table-wrap { padding: 12px 20px 110px; }
 
-  td.code { font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; color: var(--accent2); white-space: nowrap; }
+  /* Header fijo */
+  .list-header {
+    display: flex; align-items: center; gap: 0;
+    background: var(--accent2); border-radius: 10px 10px 0 0;
+    padding: 9px 14px; margin-bottom: 0;
+    font-size: 10.5px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: rgba(255,255,255,.85);
+  }
+  .lh-check  { width: 30px; flex-shrink: 0; }
+  .lh-code   { width: 148px; flex-shrink: 0; }
+  .lh-desc   { flex: 1; min-width: 0; }
+  .lh-prov   { width: 108px; flex-shrink: 0; text-align: center; }
+  .lh-copy   { width: 80px; flex-shrink: 0; }
 
-  /* Descripción + acabado en la misma celda, cerca */
-  td.desc-cell { font-size: 13px; }
-  .desc-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .desc-text { }
-  .desc-dim  { color: var(--muted); font-size: 12.5px; }
-  .tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+  /* Filas */
+  .list-body { background: var(--surface); border-radius: 0 0 10px 10px; box-shadow: var(--shadow); overflow: hidden; }
+  .list-row {
+    display: flex; align-items: center; gap: 0;
+    padding: 7px 14px; border-bottom: 1px solid var(--border);
+    transition: background .08s; cursor: default;
+  }
+  .list-row:last-child { border-bottom: none; }
+  .list-row:hover { background: var(--surface2); }
+  .list-row.selected { background: #EBF2FF; }
+  body.dark-mode .list-row:hover { background: #1E2535 !important; }
+  body.dark-mode .list-row.selected { background: #1A2D4A !important; }
+
+  /* Celdas */
+  .rc-check  { width: 30px; flex-shrink: 0; display: flex; align-items: center; }
+  .rc-code   { width: 148px; flex-shrink: 0; font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--accent2); letter-spacing: .02em; white-space: nowrap; }
+  body.dark-mode .rc-code { color: #7EB8F7 !important; }
+  .rc-desc   { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; font-size: 13.5px; overflow: hidden; }
+  .rc-desc-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+  body.dark-mode .rc-desc-text { color: #E8ECF4 !important; }
+  .rc-prov   { width: 108px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .rc-copy   { width: 80px; flex-shrink: 0; display: flex; align-items: center; justify-content: flex-end; }
+
+  /* Tags EG / HG */
+  .tag { display: inline-block; padding: 1px 7px; border-radius: 5px; font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
   .tag-eg { background: #FEF3C7; color: #92400E; }
-  .tag-hg { background: #DCFCE7; color: #166534; }
+  .tag-hg  { background: #DCFCE7; color: #166534; }
 
-  .badge-src { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: #fff; white-space: nowrap; }
+  /* Badge proveedor */
+  .badge-src { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: #fff; white-space: nowrap; }
   .badge-expomin { background: var(--badge-expomin); }
   .badge-mjm     { background: var(--badge-mjm); }
 
-  /* Botón copia individual */
-  .btn-copy-row {
-    background: none; border: 1px solid var(--border); border-radius: 5px;
-    padding: 3px 8px; font-size: 11px; cursor: pointer; color: var(--muted);
-    transition: all .15s; white-space: nowrap;
-  }
-  .btn-copy-row:hover { border-color: var(--accent2); color: var(--accent2); background: #EEF4FF; }
+  /* Botón copiar individual */
+  .btn-copy-row { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 3px 9px; font-size: 11px; cursor: pointer; color: var(--muted); transition: all .15s; white-space: nowrap; }
+  .btn-copy-row:hover { border-color: var(--accent2); color: var(--accent2); background: #EBF2FF; }
   .btn-copy-row.copied { border-color: var(--green); color: var(--green); }
+  body.dark-mode .btn-copy-row:hover { background: #1A2D4A !important; color: #7EB8F7 !important; border-color: #7EB8F7 !important; }
 
-  input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; accent-color: var(--accent2); }
+  /* Checkbox */
+  input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; accent-color: var(--accent2); display: block; }
 
   .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
   .empty svg { margin-bottom: 12px; opacity: .3; }
   .empty p { font-size: 15px; }
   .empty small { font-size: 12px; }
 
-  #copyBar {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--accent2); color: #fff; padding: 14px 24px;
-    display: none; align-items: center; gap: 14px;
-    box-shadow: 0 -4px 20px rgba(0,0,0,.2); z-index: 100;
+  /* ── COPY BAR estilo Darlux ── */
+  #copy-bar {
+    display: none; position: fixed; bottom: 28px; left: 50%;
+    transform: translateX(-50%);
+    background: #1E3A5F; border: 2px solid #3B82F6; border-radius: 16px;
+    padding: 12px 22px; align-items: center; gap: 14px;
+    box-shadow: 0 8px 40px rgba(0,0,0,.6); z-index: 99999; white-space: nowrap;
   }
-  #copyBar.visible { display: flex; }
-  .copy-info { flex: 1; font-size: 13px; }
-  .copy-info strong { font-size: 15px; }
-  #codesPreview { font-family: var(--font-mono); font-size: 11px; background: rgba(255,255,255,.1); border-radius: 4px; padding: 6px 10px; max-width: 420px; overflow-x: auto; white-space: nowrap; flex: 2; }
-  .btn-copy-bar { background: var(--accent); color: #fff; border: none; padding: 9px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity .15s; white-space: nowrap; }
-  .btn-copy-bar:hover { opacity: .85; }
-  .btn-clear { background: rgba(255,255,255,.15); color: #fff; border: none; padding: 9px 14px; border-radius: var(--radius); font-size: 12px; cursor: pointer; white-space: nowrap; }
-  .btn-clear:hover { background: rgba(255,255,255,.25); }
-  .copy-toast { position: fixed; bottom: 82px; left: 50%; transform: translateX(-50%); background: var(--green); color: #fff; padding: 9px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 200; }
+  #copy-bar.visible { display: flex; }
+  #copy-bar-icon { font-size: 20px; }
+  #copy-bar-info { display: flex; flex-direction: column; gap: 2px; }
+  #copy-bar-count { font-size: 15px; font-weight: 800; color: #fff; }
+  #copy-bar-sub { font-size: 10px; color: rgba(255,255,255,.65); text-transform: uppercase; letter-spacing: .5px; }
+  #copy-bar-btn { background: #3B82F6; color: #fff; border: none; border-radius: 9px; padding: 8px 18px; font-size: 13px; font-weight: 800; cursor: pointer; }
+  #copy-bar-btn:hover { background: #2563EB; }
+  #copy-bar-btn.done { background: #22C55E; }
+  #copy-bar-clear { font-size: 12px; color: rgba(255,255,255,.6); cursor: pointer; padding: 5px 10px; border-radius: 7px; border: 1px solid rgba(255,255,255,.25); }
+  #copy-bar-clear:hover { background: rgba(255,255,255,.1); }
+  .copy-toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--green); color: #fff; padding: 9px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 200; }
   .copy-toast.show { opacity: 1; }
+  /* seleccionar visibles btn */
+  .btn-sel-all { padding: 8px 14px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: var(--radius); font-size: 12px; cursor: pointer; color: var(--muted); transition: all .15s; white-space: nowrap; }
+  .btn-sel-all:hover { border-color: var(--accent2); color: var(--accent2); }
 
   @media (max-width: 768px) {
     .controls { flex-direction: column; align-items: stretch; }
@@ -222,18 +253,15 @@
 </div>
 
 <div class="table-wrap">
-  <table id="productTable">
-    <thead>
-      <tr>
-        <th></th>
-        <th>Código Dartel</th>
-        <th>Descripción · Medidas · Acabado</th>
-        <th>Proveedor</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
+  <!-- Header de lista -->
+  <div class="list-header" id="productTable">
+    <div class="lh-check"></div>
+    <div class="lh-code">Código Dartel</div>
+    <div class="lh-desc">Descripción · Medidas · Acabado</div>
+    <div class="lh-prov">Proveedor</div>
+    <div class="lh-copy"></div>
+  </div>
+  <div id="tableBody"></div>
   <div class="empty" id="emptyState" style="display:none;">
     <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
     <p>Sin resultados</p>
@@ -270,11 +298,14 @@
   </div>
 </div>
 
-<div id="copyBar">
-  <div class="copy-info"><strong id="copyCount">0</strong> código(s)</div>
-  <div id="codesPreview"></div>
-  <button class="btn-copy-bar" onclick="copyCodes()">📋 Copiar para SAP</button>
-  <button class="btn-clear" onclick="clearSelection()">✕ Limpiar</button>
+<div id="copy-bar">
+  <span id="copy-bar-icon">📋</span>
+  <div id="copy-bar-info">
+    <span id="copy-bar-count">0 seleccionados</span>
+    <span id="copy-bar-sub">Lista para SAP / Excel</span>
+  </div>
+  <button id="copy-bar-btn" onclick="copyCodes()">Copiar lista</button>
+  <span id="copy-bar-clear" onclick="clearSelection()">✕ Limpiar</span>
 </div>
 <div class="copy-toast" id="copyToast">✓ Copiado</div>
 
@@ -810,6 +841,71 @@ const P = [
 {c:"117516537",d:"Caja Especial Tipo C",     m:"520×640×240",w:"520",g:"",l:"Caja",a:"EG",p:"mjm"},
 {c:"117515537",d:"Caja Especial Tipo C Salida 2\"",m:"520×640×240",w:"520",g:"",l:"Caja",a:"EG",p:"mjm"},
 {c:"117517037",d:"Caja Especial Tipo D",     m:"290×430×190",w:"290",g:"",l:"Caja",a:"EG",p:"mjm"},
+
+// Curvas MJM 150mm — EG
+{c:"301501237",d:"Curva Vertical Exterior 90° EPC", m:"150×100 R300",w:"150",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"301501337",d:"Curva Horizontal 90° EPC",         m:"150×100 R300",w:"150",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"301501437",d:"Curva en T 90° EPC",               m:"150×100 R300",w:"150",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"301501537",d:"Curva en Cruz 90° EPC",            m:"150×100 R300",w:"150",g:"",l:"EPC",a:"EG",p:"mjm"},
+// Tapas curvas MJM 150mm — EG
+{c:"301502137",d:"Tapa Curva Vertical Interior 90° EPC", m:"150×100 R300",w:"150",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"301502237",d:"Tapa Curva Vertical Exterior 90° EPC", m:"150×100 R300",w:"150",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"301502337",d:"Tapa Curva Horizontal 90° EPC",        m:"150×100 R300",w:"150",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"301502437",d:"Tapa Curva en T 90° EPC",              m:"150×100 R300",w:"150",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"301502537",d:"Tapa Curva en Cruz 90° EPC",           m:"150×100 R300",w:"150",g:"",l:"EPC",a:"EG",p:"mjm"},
+// Curvas MJM 150mm — HG
+{c:"311501137",d:"Curva Vertical Interior 90° EPC",  m:"150×100 R300",w:"150",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"311501237",d:"Curva Vertical Exterior 90° EPC",  m:"150×100 R300",w:"150",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"311501337",d:"Curva Horizontal 90° EPC",          m:"150×100 R300",w:"150",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"311501437",d:"Curva en T 90° EPC",                m:"150×100 R300",w:"150",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"311501537",d:"Curva en Cruz 90° EPC",             m:"150×100 R300",w:"150",g:"",l:"EPC",a:"HG",p:"mjm"},
+// Curvas MJM 250mm — EG
+{c:"302501137",d:"Curva Vertical Interior 90° EPC",  m:"250×100 R300",w:"250",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"302501237",d:"Curva Vertical Exterior 90° EPC",  m:"250×100 R300",w:"250",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"302501337",d:"Curva Horizontal 90° EPC",          m:"250×100 R300",w:"250",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"302501437",d:"Curva en T 90° EPC",                m:"250×100 R300",w:"250",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"302501537",d:"Curva en Cruz 90° EPC",             m:"250×100 R300",w:"250",g:"",l:"EPC",a:"EG",p:"mjm"},
+// Tapas curvas MJM 250mm — EG
+{c:"302502137",d:"Tapa Curva Vertical Interior 90° EPC", m:"250×100 R300",w:"250",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"302502237",d:"Tapa Curva Vertical Exterior 90° EPC", m:"250×100 R300",w:"250",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"302502337",d:"Tapa Curva Horizontal 90° EPC",        m:"250×100 R300",w:"250",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"302502437",d:"Tapa Curva en T 90° EPC",              m:"250×100 R300",w:"250",g:"",l:"EPC",a:"EG",p:"mjm"},
+{c:"302502537",d:"Tapa Curva en Cruz 90° EPC",           m:"250×100 R300",w:"250",g:"",l:"EPC",a:"EG",p:"mjm"},
+// Curvas MJM 250mm — HG
+{c:"312501137",d:"Curva Vertical Interior 90° EPC",  m:"250×100 R300",w:"250",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"312501237",d:"Curva Vertical Exterior 90° EPC",  m:"250×100 R300",w:"250",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"312501337",d:"Curva Horizontal 90° EPC",          m:"250×100 R300",w:"250",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"312501437",d:"Curva en T 90° EPC",                m:"250×100 R300",w:"250",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"312501537",d:"Curva en Cruz 90° EPC",             m:"250×100 R300",w:"250",g:"",l:"EPC",a:"HG",p:"mjm"},
+// Tapas EPC HG 150 y 250 MJM
+{c:"301502037",d:"Tapa Escalerilla EPC",     m:"150×100×3000",w:"150",g:"",l:"EPC",a:"HG",p:"mjm"},
+{c:"302502037",d:"Tapa Escalerilla EPC",     m:"250×100×3000",w:"250",g:"",l:"EPC",a:"HG",p:"mjm"},
+// Bandejas BPC/BRPC curvas 150 y 250 MJM
+{c:"401501137",d:"Curva Vertical Interior 90° BPC",  m:"150×50 R200",w:"150",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"401501237",d:"Curva Vertical Exterior 90° BPC",  m:"150×50 R200",w:"150",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"401501337",d:"Curva Horizontal 90° BPC",          m:"150×50 R200",w:"150",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"401501437",d:"Curva en T 90° BPC",                m:"150×50 R200",w:"150",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"401501537",d:"Curva en Cruz 90° BPC",             m:"150×50 R200",w:"150",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"411501137",d:"Curva Vertical Interior 90° BPC",  m:"150×50 R200",w:"150",g:"",l:"BPC",a:"HG",p:"mjm"},
+{c:"411501237",d:"Curva Vertical Exterior 90° BPC",  m:"150×50 R200",w:"150",g:"",l:"BPC",a:"HG",p:"mjm"},
+{c:"411501337",d:"Curva Horizontal 90° BPC",          m:"150×50 R200",w:"150",g:"",l:"BPC",a:"HG",p:"mjm"},
+{c:"411501437",d:"Curva en T 90° BPC",                m:"150×50 R200",w:"150",g:"",l:"BPC",a:"HG",p:"mjm"},
+{c:"411501537",d:"Curva en Cruz 90° BPC",             m:"150×50 R200",w:"150",g:"",l:"BPC",a:"HG",p:"mjm"},
+{c:"402501137",d:"Curva Vertical Interior 90° BPC",  m:"250×50 R200",w:"250",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"402501237",d:"Curva Vertical Exterior 90° BPC",  m:"250×50 R200",w:"250",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"402501337",d:"Curva Horizontal 90° BPC",          m:"250×50 R200",w:"250",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"402501437",d:"Curva en T 90° BPC",                m:"250×50 R200",w:"250",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"402501537",d:"Curva en Cruz 90° BPC",             m:"250×50 R200",w:"250",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"412501137",d:"Curva Vertical Interior 90° BPC",  m:"250×50 R200",w:"250",g:"",l:"BPC",a:"HG",p:"mjm"},
+{c:"412501237",d:"Curva Vertical Exterior 90° BPC",  m:"250×50 R200",w:"250",g:"",l:"BPC",a:"HG",p:"mjm"},
+{c:"412501337",d:"Curva Horizontal 90° BPC",          m:"250×50 R200",w:"250",g:"",l:"BPC",a:"HG",p:"mjm"},
+{c:"412501437",d:"Curva en T 90° BPC",                m:"250×50 R200",w:"250",g:"",l:"BPC",a:"HG",p:"mjm"},
+{c:"412501537",d:"Curva en Cruz 90° BPC",             m:"250×50 R200",w:"250",g:"",l:"BPC",a:"HG",p:"mjm"},
+// Tapas BPC H50 MJM
+{c:"401502037",d:"Tapa Bandeja BPC",         m:"150×50×3000",w:"150",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"411502037",d:"Tapa Bandeja BPC",         m:"150×50×3000",w:"150",g:"",l:"BPC",a:"HG",p:"mjm"},
+{c:"402502037",d:"Tapa Bandeja BPC",         m:"250×50×3000",w:"250",g:"",l:"BPC",a:"EG",p:"mjm"},
+{c:"412502037",d:"Tapa Bandeja BPC",         m:"250×50×3000",w:"250",g:"",l:"BPC",a:"HG",p:"mjm"},
 ];
 
 // ─── BÚSQUEDA ────────────────────────────────────────────────────────────────
@@ -910,30 +1006,33 @@ function render() {
     return;
   }
   document.getElementById('emptyState').style.display = 'none';
-  document.getElementById('productTable').style.display = '';
+  document.getElementById('productTable').style.display = 'flex';
+
+  // Envolver en list-body
+  const listBody = document.createElement('div');
+  listBody.className = 'list-body';
 
   filtered.forEach(prod => {
-    const tr = document.createElement('tr');
-    if (selected.has(prod.c)) tr.classList.add('selected');
-    tr.innerHTML = `
-      <td><input type="checkbox" data-code="${prod.c}" ${selected.has(prod.c)?'checked':''}></td>
-      <td class="code">${prod.c}</td>
-      <td class="desc-cell">
-        <div class="desc-line">
-          <span class="desc-text">${prod.d} — ${prod.m}</span>
-          <span class="tag tag-${prod.a.toLowerCase()}">${prod.a}</span>
-        </div>
-      </td>
-      <td><span class="badge-src badge-${prod.p}">${prod.p==='expomin'?'Expomin':'MJM S.A.'}</span></td>
-      <td><button class="btn-copy-row" onclick="copyOne('${prod.c}',this)">📋 Copiar</button></td>
+    const row = document.createElement('div');
+    row.className = 'list-row' + (selected.has(prod.c) ? ' selected' : '');
+    row.innerHTML = `
+      <div class="rc-check"><input type="checkbox" data-code="${prod.c}" ${selected.has(prod.c)?'checked':''}></div>
+      <div class="rc-code">${prod.c}</div>
+      <div class="rc-desc">
+        <span class="rc-desc-text">${prod.d} — ${prod.m}</span>
+        <span class="tag tag-${prod.a.toLowerCase()}">${prod.a}</span>
+      </div>
+      <div class="rc-prov"><span class="badge-src badge-${prod.p}">${prod.p==='expomin'?'Expomin':'MJM S.A.'}</span></div>
+      <div class="rc-copy"><button class="btn-copy-row" onclick="copyOne('${prod.c}',this)">⎘ Copiar</button></div>
     `;
-    tr.querySelector('input[type="checkbox"]').addEventListener('change', function() {
-      if (this.checked) { selected.add(prod.c); tr.classList.add('selected'); }
-      else              { selected.delete(prod.c); tr.classList.remove('selected'); }
+    row.querySelector('input[type="checkbox"]').addEventListener('change', function() {
+      if (this.checked) { selected.add(prod.c); row.classList.add('selected'); }
+      else              { selected.delete(prod.c); row.classList.remove('selected'); }
       updateCopyBar();
     });
-    tbody.appendChild(tr);
+    listBody.appendChild(row);
   });
+  tbody.appendChild(listBody);
 }
 
 function copyOne(code, btn) {
@@ -946,26 +1045,33 @@ function copyOne(code, btn) {
 
 function selectAll() {
   visibleRows.forEach(p => selected.add(p.c));
-  render(); updateCopyBar();
+  render();
+  updateCopyBar();
 }
 function clearSelection() {
-  selected.clear(); render(); updateCopyBar();
+  selected.clear();
+  document.querySelectorAll('.list-row.selected').forEach(r => {
+    r.classList.remove('selected');
+    const cb = r.querySelector('input[type=checkbox]');
+    if (cb) cb.checked = false;
+  });
+  updateCopyBar();
 }
 function updateCopyBar() {
-  const codes = Array.from(selected);
-  const bar = document.getElementById('copyBar');
-  if (!codes.length) { bar.classList.remove('visible'); return; }
-  bar.classList.add('visible');
-  document.getElementById('copyCount').textContent = codes.length;
-  document.getElementById('codesPreview').textContent = codes.join('\t');
+  const n = selected.size;
+  const bar = document.getElementById('copy-bar');
+  document.getElementById('copy-bar-count').textContent =
+    n === 1 ? '1 código seleccionado' : n + ' códigos seleccionados';
+  bar.classList.toggle('visible', n > 0);
 }
 function copyCodes() {
-  const codes = Array.from(selected);
-  if (!codes.length) return;
-  navigator.clipboard.writeText(codes.join('\t')).then(() => {
-    const t = document.getElementById('copyToast');
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2000);
+  if (!selected.size) return;
+  const list = [...selected].join('\r\n');
+  navigator.clipboard.writeText(list).then(() => {
+    const btn = document.getElementById('copy-bar-btn');
+    btn.classList.add('done');
+    btn.textContent = '✓ ¡Copiados! · Limpiar para seguir';
+    setTimeout(() => { btn.textContent = 'Copiar lista'; btn.classList.remove('done'); }, 3000);
   });
 }
 
@@ -981,8 +1087,7 @@ render();
     document.getElementById('filterProveedor').value = '';
     document.getElementById('filterLinea').value = '';
     document.getElementById('filterAcabado').value = '';
-    selected.clear();
-    updateCopyBar();
+    clearSelection();
     render();
   }
 
